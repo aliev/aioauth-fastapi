@@ -9,11 +9,11 @@ class Settings(BaseSettings):
     PROJECT_PORT: int = 8001
     DEBUG: bool = False
 
-    REDIS_DSNS: List[str] = []
+    REDIS_DSN: List[str]
     PSQL_DSN: str
 
-    JWT_PUBLIC_KEY: str
-    JWT_PRIVATE_KEY: str
+    JWT_PUBLIC_KEY: str = ""
+    JWT_PRIVATE_KEY: str = ""
 
     class Config:
         env_file = ".env"

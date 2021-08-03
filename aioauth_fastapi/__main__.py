@@ -2,7 +2,7 @@ import uvicorn as uvicorn
 from fastapi import FastAPI, Security
 from fastapi.responses import ORJSONResponse
 from fastapi.security import APIKeyHeader
-from aioauth_fastapi.middleware import JWTAuthBackend
+from aioauth_fastapi.auth.backends import JWTAuthBackend
 from aioauth_fastapi.events import on_shutdown, on_startup
 from aioauth_fastapi.config import settings
 

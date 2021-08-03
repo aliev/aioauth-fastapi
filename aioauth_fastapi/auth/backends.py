@@ -2,7 +2,7 @@ import jwt
 from fastapi.security.utils import get_authorization_scheme_param
 from jwt.exceptions import PyJWTError
 from aioauth_fastapi.config import settings
-from aioauth_fastapi.models import AnonymousUser, User
+from .models import AnonymousUser, User
 from starlette.authentication import AuthCredentials, AuthenticationBackend
 
 
