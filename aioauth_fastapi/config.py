@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseSettings
 
 
@@ -9,7 +7,7 @@ class Settings(BaseSettings):
     PROJECT_PORT: int = 8001
     DEBUG: bool = False
 
-    REDIS_DSN: List[str]
+    REDIS_DSN: str
     PSQL_DSN: str
 
     JWT_PUBLIC_KEY: str = ""
