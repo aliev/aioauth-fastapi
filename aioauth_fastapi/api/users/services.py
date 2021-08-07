@@ -52,7 +52,7 @@ class UserService:
             await self.redis.set(
                 f"{decoded_refresh_token['sub']}",
                 f"{decoded_refresh_token['jti']}",
-                ex=86400,
+                ex=settings.REFRESH_TOKEN_EXP,
             )
             return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
