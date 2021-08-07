@@ -10,8 +10,11 @@ class Settings(BaseSettings):
     REDIS_DSN: str
     PSQL_DSN: str
 
-    JWT_PUBLIC_KEY: str = ""
-    JWT_PRIVATE_KEY: str = ""
+    JWT_PUBLIC_KEY: str
+    JWT_PRIVATE_KEY: str
+
+    ACCESS_TOKEN_EXP: int = 900  # 15 minutes
+    REFRESH_TOKEN_EXP: int = 86400  # 1 day
 
     class Config:
         env_file = ".env"

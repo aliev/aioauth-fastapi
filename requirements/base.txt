@@ -7,3 +7,5 @@ aiohttp==3.7.4.post0
 asyncpg==0.23.0
 SQLAlchemy==1.4.22
 wheel
+orjson==3.6.1
+python-jose[cryptography]==3.3.0
