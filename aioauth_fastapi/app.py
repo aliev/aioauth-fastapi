@@ -5,7 +5,9 @@ from aioauth_fastapi.auth.backends import JWTAuthBackend
 from aioauth_fastapi.events import on_shutdown, on_startup
 from aioauth_fastapi.config import settings
 
-from .users.endpoints import router as users_router
+from .containers import ApplicationContainer
+
+from .users import endpoints as users_endpoint
 
 from starlette.middleware.authentication import AuthenticationMiddleware
 
@@ -20,7 +22,14 @@ app = FastAPI(
     on_shutdown=on_shutdown,
 )
 
+container = ApplicationContainer()
+app.container = container
+app.container.init_resources()
+app.container.wire(modules=[users_endpoint])
+
 
 # Include API router
-app.include_router(users_router, prefix="/api/users", dependencies=[Security(api_key)])
+app.include_router(
+    users_endpoint.router, prefix="/api/users", dependencies=[Security(api_key)]
+)
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuthBackend())

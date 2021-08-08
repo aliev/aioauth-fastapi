@@ -1,8 +1,13 @@
-from typing import Optional
-from aioredis.client import Redis
-
-redis_pool: Optional[Redis] = None
+import aioredis
+from ..config import settings
 
 
-def get_redis_pool() -> Optional[Redis]:
-    return redis_pool
+async def init_redis_pool():
+    pool = aioredis.from_url(settings.REDIS_DSN)
+    yield pool
+    await pool.close()
+
+
+class Redis:
+    def __init__(self, redis) -> None:
+        self.redis = redis

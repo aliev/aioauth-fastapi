@@ -1,25 +1,31 @@
+from aioauth_fastapi.users.services import UserService
 from fastapi.params import Depends
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 
 from .requests import UserLoginRequest, UserRegistrationRequest
-from .services import get_user_service, UserService
+from ..containers import ApplicationContainer
+from dependency_injector.wiring import inject, Provide
 
 router = APIRouter()
 
 
 @router.post("/registration")
+@inject
 async def user_registration(
-    request: Request,
     body: UserRegistrationRequest,
-    user_service: UserService = Depends(get_user_service),
+    user_service: UserService = Depends(
+        Provide[ApplicationContainer.user_package.user_service]
+    ),
 ):
     return await user_service.user_registration(body)
 
 
 @router.post("/login")
+@inject
 async def user_login(
-    request: Request,
     body: UserLoginRequest,
-    user_service: UserService = Depends(get_user_service),
+    user_service: UserService = Depends(
+        Provide[ApplicationContainer.user_package.user_service]
+    ),
 ):
     return await user_service.user_login(body)
