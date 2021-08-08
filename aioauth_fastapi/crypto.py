@@ -4,6 +4,7 @@ import hmac
 import math
 import secrets
 import string
+from typing import Dict
 from jose import jwt, constants
 import uuid
 from datetime import timedelta, timezone, datetime
@@ -69,6 +70,7 @@ def encode_jwt(
     identity,
     token_type,
     secret,
+    custom_headers: Dict = {},
     algorithm=constants.ALGORITHMS.RS256,
 ):
     now = datetime.now(timezone.utc)
@@ -80,6 +82,7 @@ def encode_jwt(
         "type": token_type,
         "sub": identity,
         "exp": now + timedelta(seconds=expires_delta),
+        **custom_headers,
     }
 
     return jwt.encode(

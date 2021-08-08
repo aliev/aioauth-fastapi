@@ -5,9 +5,11 @@ from dependency_injector import containers, providers
 
 class UserContainer(containers.DeclarativeContainer):
 
-    storage = providers.Dependency()
+    database = providers.Dependency()
     redis = providers.Dependency()
 
-    user_repository = providers.Singleton(UserRepository, storage)
+    user_repository = providers.Singleton(UserRepository, database)
 
-    user_service = providers.Singleton(UserService, user_repository)
+    user_service = providers.Singleton(
+        UserService, user_repository=user_repository, redis=redis
+    )

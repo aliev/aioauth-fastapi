@@ -5,7 +5,7 @@ from fastapi.exceptions import HTTPException
 from starlette.requests import Request
 
 
-def auth_required():
+def check_access_token():
     def decorator(f):
         @functools.wraps(f)
         async def wrapper(*args, request: Request, **kwargs):
