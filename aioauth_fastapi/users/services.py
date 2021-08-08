@@ -1,15 +1,18 @@
-from aioauth_fastapi.storage.redis import get_redis_pool
-from aioauth_fastapi.api.users.exceptions import DuplicateUserException
-from aioauth_fastapi.api.users.storage import UserStorage
-from aioauth_fastapi.crypto import decode_jwt, encode_jwt
-from aioauth_fastapi.api.users.responses import TokenResponse
-from aioauth_fastapi.api.users.requests import UserLoginRequest, UserRegistrationRequest
-from aioauth_fastapi.storage.db import get_sqlalchemy_async_session
-from starlette.requests import Request
-from fastapi import HTTPException, Response
-from aioauth_fastapi.config import settings
 from aioredis.client import Redis
 from http import HTTPStatus
+
+from starlette.requests import Request
+from fastapi import HTTPException, Response
+
+from .exceptions import DuplicateUserException
+from .storage import UserStorage
+from .responses import TokenResponse
+from .requests import UserLoginRequest, UserRegistrationRequest
+
+from ..storage.db import get_sqlalchemy_async_session
+from ..crypto import decode_jwt, encode_jwt
+from ..config import settings
+from ..storage.redis import get_redis_pool
 
 
 class UserService:

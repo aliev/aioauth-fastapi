@@ -1,9 +1,11 @@
 from typing import Optional
-from aioauth_fastapi.api.users.exceptions import DuplicateUserException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
-from aioauth_fastapi.storage.tables import UserTable
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from .exceptions import DuplicateUserException
+
+from ..storage.tables import UserTable
 
 
 class UserStorage:

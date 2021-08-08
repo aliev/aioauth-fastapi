@@ -1,7 +1,7 @@
 from fastapi.params import Depends
 from fastapi import APIRouter, Request
 
-from . import requests
+from .requests import UserLoginRequest, UserRegistrationRequest
 from .services import get_user_service, UserService
 
 router = APIRouter()
@@ -10,7 +10,7 @@ router = APIRouter()
 @router.post("/registration")
 async def user_registration(
     request: Request,
-    body: requests.UserRegistrationRequest,
+    body: UserRegistrationRequest,
     user_service: UserService = Depends(get_user_service),
 ):
     return await user_service.user_registration(body)
@@ -19,7 +19,7 @@ async def user_registration(
 @router.post("/login")
 async def user_login(
     request: Request,
-    body: requests.UserLoginRequest,
+    body: UserLoginRequest,
     user_service: UserService = Depends(get_user_service),
 ):
     return await user_service.user_login(body)
