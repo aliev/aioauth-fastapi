@@ -44,3 +44,9 @@ async def user_logout(
     ),
 ):
     return await user_service.user_logout(request)
+
+
+@router.post("/token/refresh", dependencies=[api_security])
+@inject
+async def token_refresh():
+    pass

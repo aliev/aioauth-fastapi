@@ -6,6 +6,8 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from aioauth_fastapi.config import settings
 from aioauth_fastapi.storage.tables import *
+from aioauth_fastapi.users.tables import *
+from aioauth_fastapi.oauth2.tables import *
 
 
 from alembic import context

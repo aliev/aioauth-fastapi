@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 
 from .exceptions import DuplicateUserException
 
-from ..storage.tables import UserTable
+from ..users.tables import UserTable
 
 
 class UserRepository:

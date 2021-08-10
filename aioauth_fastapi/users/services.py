@@ -1,3 +1,4 @@
+from typing import Tuple
 from starlette.requests import Request
 from aioauth_fastapi.users.repositories import UserRepository
 from http import HTTPStatus
@@ -9,9 +10,9 @@ from .exceptions import DuplicateUserException
 from .responses import TokenResponse
 from .requests import UserLoginRequest, UserRegistrationRequest
 
-from ..crypto import decode_jwt, encode_jwt
+from .crypto import decode_jwt, encode_jwt
 from ..config import settings
-from ..storage.tables import UserTable
+from ..users.tables import UserTable
 
 
 class UserService:
@@ -19,7 +20,7 @@ class UserService:
         self.repository = user_repository
         self.redis = redis
 
-    def _generate_tokens_pair(self, user: UserTable):
+    def _generate_tokens_pair(self, user: UserTable) -> Tuple[str, str]:
         general_options = {
             "identity": str(user.id),
             "secret": settings.JWT_PRIVATE_KEY,
@@ -44,7 +45,7 @@ class UserService:
 
         return access_token, refresh_token
 
-    async def user_login(self, body: UserLoginRequest):
+    async def user_login(self, body: UserLoginRequest) -> TokenResponse:
 
         user = await self.repository.get_user(username=body.username)
 
@@ -66,7 +67,7 @@ class UserService:
 
             return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
-        return HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
     async def user_registration(self, body: UserRegistrationRequest) -> Response:
         try:
@@ -79,7 +80,7 @@ class UserService:
 
         return Response(status_code=HTTPStatus.NO_CONTENT)
 
-    async def user_logout(self, request: Request):
+    async def user_logout(self, request: Request) -> Response:
         """
         Remove refresh_token from whitelisted tokens.
         """

@@ -8,6 +8,7 @@ from .config import settings
 from .containers import ApplicationContainer
 
 from .users import endpoints as users_endpoint
+from .oauth2 import endpoints as oauth2_endpoints
 
 from starlette.middleware.authentication import AuthenticationMiddleware
 
@@ -20,12 +21,12 @@ app = FastAPI(
     on_shutdown=on_shutdown,
 )
 
-container = ApplicationContainer()
-app.container = container
+app.container = ApplicationContainer()
 app.container.init_resources()
-app.container.wire(modules=[users_endpoint])
+app.container.wire(modules=[users_endpoint, oauth2_endpoints])
 
 
 # Include API router
-app.include_router(users_endpoint.router, prefix="/api/users")
+app.include_router(users_endpoint.router, prefix="/api/users", tags=["users"])
+app.include_router(oauth2_endpoints.router, prefix="/api/oauth2", tags=["oauth2"])
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuthBackend())
