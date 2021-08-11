@@ -9,7 +9,7 @@ from aioauth.requests import (
     Request as OAuth2Request,
 )
 from aioauth.responses import Response as OAuth2Response
-from aioauth.structures import CaseInsensitiveDict
+from aioauth.collections import HTTPHeaderDict
 
 
 async def to_oauth2_request(request: Request) -> OAuth2Request:
@@ -19,7 +19,7 @@ async def to_oauth2_request(request: Request) -> OAuth2Request:
     post = dict(form)
     query_params = dict(request.query_params)
     method = request.method
-    headers = CaseInsensitiveDict(**request.headers)
+    headers = HTTPHeaderDict(**request.headers)
     url = str(request.url)
 
     user = None
