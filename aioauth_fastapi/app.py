@@ -28,5 +28,5 @@ app.container.wire(modules=[users_endpoint, oauth2_endpoints])
 
 # Include API router
 app.include_router(users_endpoint.router, prefix="/api/users", tags=["users"])
-app.include_router(oauth2_endpoints.router, prefix="/api/oauth2", tags=["oauth2"])
+app.include_router(oauth2_endpoints.router, prefix="/oauth2", tags=["oauth2"])
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuthBackend())

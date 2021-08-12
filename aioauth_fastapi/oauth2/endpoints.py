@@ -44,9 +44,9 @@ async def token_introspect(
     return await to_fastapi_response(oauth2_response)
 
 
-@router.get("/authorization")
+@router.get("/authorize")
 @inject
-async def authorization(
+async def authorize(
     request: Request,
     query: Query = Depends(),
     oauth2_service: OAuth2Service = Depends(

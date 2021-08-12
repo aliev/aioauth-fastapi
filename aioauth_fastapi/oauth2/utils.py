@@ -23,7 +23,7 @@ async def to_oauth2_request(request: Request) -> OAuth2Request:
     headers = HTTPHeaderDict(**request.headers)
     url = str(request.url)
 
-    user = None
+    user = request.user
 
     if request.user.is_authenticated:
         user = request.user
