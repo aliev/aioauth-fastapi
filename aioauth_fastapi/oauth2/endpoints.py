@@ -5,6 +5,11 @@ from dependency_injector.wiring import inject, Provide
 from ..containers import ApplicationContainer
 from .utils import to_oauth2_request, to_fastapi_response
 from .services import OAuth2Service
+from aioauth.requests import Query
+
+
+from .requests import TokenIntrospectRequest
+from .forms import TokenForm
 
 router = APIRouter()
 
@@ -13,6 +18,7 @@ router = APIRouter()
 @inject
 async def token(
     request: Request,
+    form: TokenForm = Depends(),
     oauth2_service: OAuth2Service = Depends(
         Provide[ApplicationContainer.oauth2_package.oauth2_service]
     ),
@@ -27,6 +33,7 @@ async def token(
 @inject
 async def token_introspect(
     request: Request,
+    form: TokenIntrospectRequest = Depends(),
     oauth2_service: OAuth2Service = Depends(
         Provide[ApplicationContainer.oauth2_package.oauth2_service]
     ),
@@ -41,6 +48,7 @@ async def token_introspect(
 @inject
 async def authorization(
     request: Request,
+    query: Query = Depends(),
     oauth2_service: OAuth2Service = Depends(
         Provide[ApplicationContainer.oauth2_package.oauth2_service]
     ),

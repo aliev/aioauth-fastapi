@@ -10,6 +10,7 @@ from aioauth.requests import (
 )
 from aioauth.responses import Response as OAuth2Response
 from aioauth.collections import HTTPHeaderDict
+from aioauth.config import Settings
 
 
 async def to_oauth2_request(request: Request) -> OAuth2Request:
@@ -27,7 +28,10 @@ async def to_oauth2_request(request: Request) -> OAuth2Request:
     if request.user.is_authenticated:
         user = request.user
 
+    settings = Settings(INSECURE_TRANSPORT=True)
+
     return OAuth2Request(
+        settings=settings,
         method=RequestMethod[method],
         headers=headers,
         post=Post(**post),

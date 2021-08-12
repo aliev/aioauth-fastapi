@@ -1,6 +1,6 @@
-from jose import jwt
+import jwt
 from fastapi.security.utils import get_authorization_scheme_param
-from jwt.exceptions import PyJWTError
+from jwt.exceptions import PyJWTError, DecodeError
 from ..config import settings
 from .models import AnonymousUser, User
 from starlette.authentication import AuthCredentials, AuthenticationBackend
@@ -16,10 +16,10 @@ class JWTAuthBackend(AuthenticationBackend):
         _, token = get_authorization_scheme_param(authorization)
         key = settings.JWT_PUBLIC_KEY
 
-        token_header = jwt.get_unverified_header(token)
-
         try:
+            token_header = jwt.get_unverified_header(token)
             decoded_token = jwt.decode(token, key, algorithms=token_header.get("alg"))
-            return AuthCredentials(), User(id=decoded_token.get("sub"), **decoded_token)
-        except PyJWTError:
+        except (PyJWTError, DecodeError):
             return AuthCredentials(), AnonymousUser()
+        else:
+            return AuthCredentials(), User(id=decoded_token.get("sub"), **decoded_token)

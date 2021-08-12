@@ -65,9 +65,9 @@ class OAuth2Repository(BaseStorage):
         return await super().save_authorization_code(authorization_code)
 
     async def get_client(
-        self, request: Request, client_id: str, client_secret: Optional[str]
+        self, request: Request, client_id: str, client_secret: Optional[str] = None
     ) -> Optional[Client]:
-        return await super().get_client(request, client_id, client_secret=client_secret)
+        return await super().get_client(request, client_id, client_secret)
 
     async def authenticate(self, request: Request) -> bool:
         return await super().authenticate(request)
