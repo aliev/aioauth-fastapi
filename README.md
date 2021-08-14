@@ -32,6 +32,15 @@ INSERT INTO client (
 );
 ```
 
+Create .env file:
+
+```
+PSQL_DSN=postgresql+asyncpg://user@localhost/database
+DEBUG=True
+JWT_PRIVATE_KEY=''
+JWT_PUBLIC_KEY=''
+```
+
 Run server
 
 ```
