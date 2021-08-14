@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4
 
 
 class AnonymousUser(BaseModel):
@@ -7,7 +7,7 @@ class AnonymousUser(BaseModel):
 
 
 class User(BaseModel):
-    id: str
+    id: UUID4
     is_superuser: bool
     is_blocked: bool
     username: str

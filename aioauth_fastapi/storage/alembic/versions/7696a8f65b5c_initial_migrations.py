@@ -1,8 +1,8 @@
 """Initial migrations
 
-Revision ID: d6633986eaab
+Revision ID: 7696a8f65b5c
 Revises:
-Create Date: 2021-08-10 22:23:30.776032
+Create Date: 2021-08-14 22:49:57.835720
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "d6633986eaab"
+revision = "7696a8f65b5c"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,6 +31,7 @@ def upgrade():
         sa.Column("code_challenge", sa.String(), nullable=True),
         sa.Column("code_challenge_method", sa.String(), nullable=True),
         sa.Column("nonce", sa.String(), nullable=True),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("id"),
     )
@@ -54,9 +55,11 @@ def upgrade():
         sa.Column("scope", sa.String(), nullable=True),
         sa.Column("issued_at", sa.Integer(), nullable=True),
         sa.Column("expires_in", sa.Integer(), nullable=True),
+        sa.Column("refresh_token_expires_in", sa.Integer(), nullable=True),
         sa.Column("client_id", sa.String(), nullable=True),
         sa.Column("token_type", sa.String(), nullable=True),
         sa.Column("revoked", sa.Boolean(), nullable=True),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("id"),
     )

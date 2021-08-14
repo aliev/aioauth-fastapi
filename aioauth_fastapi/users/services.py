@@ -1,7 +1,6 @@
 from starlette.requests import Request
 from aioauth_fastapi.users.repositories import UserRepository
 from http import HTTPStatus
-from aioredis.client import Redis
 
 from fastapi import HTTPException, Response
 
@@ -9,16 +8,16 @@ from .exceptions import DuplicateUserException
 from .responses import TokenResponse
 from .requests import UserLoginRequest, UserRegistrationRequest
 
-from .crypto import decode_jwt, encode_jwt
-from ..config import settings
+from .crypto import get_jwt
 
 
 class UserService:
-    def __init__(self, user_repository: UserRepository, redis: Redis) -> None:
+    def __init__(self, user_repository: UserRepository) -> None:
         self.repository = user_repository
-        self.redis = redis
 
-    async def user_login(self, body: UserLoginRequest) -> TokenResponse:
+    async def user_login(
+        self, body: UserLoginRequest, response: Response
+    ) -> TokenResponse:
 
         user = await self.repository.get_user(username=body.username)
 
@@ -28,37 +27,9 @@ class UserService:
         is_verified = user.verify_password(body.password)
 
         if is_verified:
-            access_token = encode_jwt(
-                sub=str(user.id),
-                secret=settings.JWT_PRIVATE_KEY,
-                expires_delta=settings.ACCESS_TOKEN_EXP,
-                token_type="access",
-                additional_claims={
-                    "is_blocked": user.is_blocked,
-                    "is_superuser": user.is_superuser,
-                    "username": user.username,
-                },
-            )
+            access_token, refresh_token = get_jwt(user)
 
-            refresh_token = encode_jwt(
-                sub=str(user.id),
-                secret=settings.JWT_PRIVATE_KEY,
-                expires_delta=settings.REFRESH_TOKEN_EXP,
-                token_type="access",
-                additional_claims={
-                    "is_blocked": user.is_blocked,
-                    "is_superuser": user.is_superuser,
-                    "username": user.username,
-                },
-            )
-
-            decoded_refresh_token = decode_jwt(refresh_token, settings.JWT_PUBLIC_KEY)
-            # Whitelist referesh_token
-            await self.redis.set(
-                f"{decoded_refresh_token['sub']}",
-                f"{decoded_refresh_token['jti']}",
-                ex=settings.REFRESH_TOKEN_EXP,
-            )
+            response.set_cookie(key="token", value=access_token, httponly=True)
 
             return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 

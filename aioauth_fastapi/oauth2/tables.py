@@ -35,6 +35,7 @@ class AuthorizationCodeTable(BaseTable):
     code_challenge = Column(String)
     code_challenge_method = Column(String)
     nonce = Column(String)
+
     user_id = Column(
         UUID(as_uuid=True),
         nullable=False,
@@ -49,6 +50,12 @@ class TokenTable(BaseTable):
     scope = Column(String)
     issued_at = Column(Integer)
     expires_in = Column(Integer)
+    refresh_token_expires_in = Column(Integer)
     client_id = Column(String)
     token_type = Column(String)
     revoked = Column(Boolean)
+
+    user_id = Column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )

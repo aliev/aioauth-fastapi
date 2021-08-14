@@ -1,5 +1,4 @@
 import jwt
-from fastapi.security.utils import get_authorization_scheme_param
 from jwt.exceptions import PyJWTError, DecodeError
 from ..config import settings
 from .models import AnonymousUser, User
@@ -8,12 +7,11 @@ from starlette.authentication import AuthCredentials, AuthenticationBackend
 
 class JWTAuthBackend(AuthenticationBackend):
     async def authenticate(self, request):
-        authorization: str = request.headers.get("Authorization")
+        token: str = request.cookies.get("token")
 
-        if not authorization:
+        if not token:
             return AuthCredentials(), AnonymousUser()
 
-        _, token = get_authorization_scheme_param(authorization)
         key = settings.JWT_PUBLIC_KEY
 
         try:

@@ -8,6 +8,7 @@ from typing import Dict
 from jose import jwt, constants
 import uuid
 from datetime import timedelta, timezone, datetime
+from ..config import settings
 
 RANDOM_STRING_CHARS = string.ascii_lowercase + string.ascii_uppercase + string.digits
 
@@ -102,3 +103,31 @@ def decode_jwt(
         secret,
         algorithms=algorithms,
     )
+
+
+def get_jwt(user):
+    access_token = encode_jwt(
+        sub=str(user.id),
+        secret=settings.JWT_PRIVATE_KEY,
+        expires_delta=settings.ACCESS_TOKEN_EXP,
+        token_type="access",
+        additional_claims={
+            "is_blocked": user.is_blocked,
+            "is_superuser": user.is_superuser,
+            "username": user.username,
+        },
+    )
+
+    refresh_token = encode_jwt(
+        sub=str(user.id),
+        secret=settings.JWT_PRIVATE_KEY,
+        expires_delta=settings.REFRESH_TOKEN_EXP,
+        token_type="access",
+        additional_claims={
+            "is_blocked": user.is_blocked,
+            "is_superuser": user.is_superuser,
+            "username": user.username,
+        },
+    )
+
+    return access_token, refresh_token
