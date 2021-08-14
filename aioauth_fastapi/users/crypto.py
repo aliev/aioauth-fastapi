@@ -67,26 +67,26 @@ def make_random_password() -> str:
 
 def encode_jwt(
     expires_delta,
-    identity,
+    sub,
     token_type,
     secret,
-    custom_headers: Dict = {},
+    additional_claims: Dict = {},
     algorithm=constants.ALGORITHMS.RS256,
 ):
     now = datetime.now(timezone.utc)
 
-    token_data = {
+    claims = {
         "iat": now,
         "jti": str(uuid.uuid4()),
         "nbf": now,
         "type": token_type,
-        "sub": identity,
+        "sub": sub,
         "exp": now + timedelta(seconds=expires_delta),
-        **custom_headers,
+        **additional_claims,
     }
 
     return jwt.encode(
-        token_data,
+        claims,
         secret,
         algorithm,
     )

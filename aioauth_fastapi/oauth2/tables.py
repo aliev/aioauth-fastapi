@@ -1,4 +1,5 @@
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import UUID
 from ..storage.tables import BaseTable
 
 
@@ -34,6 +35,10 @@ class AuthorizationCodeTable(BaseTable):
     code_challenge = Column(String)
     code_challenge_method = Column(String)
     nonce = Column(String)
+    user_id = Column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
 
 
 class TokenTable(BaseTable):

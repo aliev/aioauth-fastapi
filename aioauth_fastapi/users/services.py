@@ -1,4 +1,3 @@
-from typing import Tuple
 from starlette.requests import Request
 from aioauth_fastapi.users.repositories import UserRepository
 from http import HTTPStatus
@@ -12,38 +11,12 @@ from .requests import UserLoginRequest, UserRegistrationRequest
 
 from .crypto import decode_jwt, encode_jwt
 from ..config import settings
-from ..users.tables import UserTable
 
 
 class UserService:
     def __init__(self, user_repository: UserRepository, redis: Redis) -> None:
         self.repository = user_repository
         self.redis = redis
-
-    def _generate_tokens_pair(self, user: UserTable) -> Tuple[str, str]:
-        general_options = {
-            "identity": str(user.id),
-            "secret": settings.JWT_PRIVATE_KEY,
-            "custom_headers": {
-                "is_superuser": user.is_superuser,
-                "is_blocked": user.is_blocked,
-                "username": user.username,
-            },
-        }
-
-        access_token = encode_jwt(
-            **general_options,
-            expires_delta=settings.ACCESS_TOKEN_EXP,
-            token_type="access",
-        )
-
-        refresh_token = encode_jwt(
-            **general_options,
-            expires_delta=settings.REFRESH_TOKEN_EXP,
-            token_type="refresh",
-        )
-
-        return access_token, refresh_token
 
     async def user_login(self, body: UserLoginRequest) -> TokenResponse:
 
@@ -55,7 +28,29 @@ class UserService:
         is_verified = user.verify_password(body.password)
 
         if is_verified:
-            access_token, refresh_token = self._generate_tokens_pair(user)
+            access_token = encode_jwt(
+                sub=str(user.id),
+                secret=settings.JWT_PRIVATE_KEY,
+                expires_delta=settings.ACCESS_TOKEN_EXP,
+                token_type="access",
+                additional_claims={
+                    "is_blocked": user.is_blocked,
+                    "is_superuser": user.is_superuser,
+                    "username": user.username,
+                },
+            )
+
+            refresh_token = encode_jwt(
+                sub=str(user.id),
+                secret=settings.JWT_PRIVATE_KEY,
+                expires_delta=settings.REFRESH_TOKEN_EXP,
+                token_type="access",
+                additional_claims={
+                    "is_blocked": user.is_blocked,
+                    "is_superuser": user.is_superuser,
+                    "username": user.username,
+                },
+            )
 
             decoded_refresh_token = decode_jwt(refresh_token, settings.JWT_PUBLIC_KEY)
             # Whitelist referesh_token

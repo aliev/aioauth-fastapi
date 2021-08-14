@@ -6,6 +6,7 @@ from ..containers import ApplicationContainer
 from .utils import to_oauth2_request, to_fastapi_response
 from .services import OAuth2Service
 from aioauth.requests import Query
+from ..users.security import api_security
 
 
 from .requests import TokenIntrospectRequest
@@ -44,7 +45,7 @@ async def token_introspect(
     return await to_fastapi_response(oauth2_response)
 
 
-@router.get("/authorize")
+@router.get("/authorize", dependencies=[api_security])
 @inject
 async def authorize(
     request: Request,

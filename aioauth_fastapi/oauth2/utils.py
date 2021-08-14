@@ -11,6 +11,7 @@ from aioauth.requests import (
 from aioauth.responses import Response as OAuth2Response
 from aioauth.collections import HTTPHeaderDict
 from aioauth.config import Settings
+from ..config import settings
 
 
 async def to_oauth2_request(request: Request) -> OAuth2Request:
@@ -23,15 +24,17 @@ async def to_oauth2_request(request: Request) -> OAuth2Request:
     headers = HTTPHeaderDict(**request.headers)
     url = str(request.url)
 
-    user = request.user
+    user = None
 
     if request.user.is_authenticated:
         user = request.user
 
-    settings = Settings(INSECURE_TRANSPORT=True)
-
     return OAuth2Request(
-        settings=settings,
+        settings=Settings(
+            INSECURE_TRANSPORT=settings.DEBUG,
+            TOKEN_EXPIRES_IN=settings.ACCESS_TOKEN_EXP,
+            REFRESH_TOKEN_EXPIRES_IN=settings.REFRESH_TOKEN_EXP,
+        ),
         method=RequestMethod[method],
         headers=headers,
         post=Post(**post),

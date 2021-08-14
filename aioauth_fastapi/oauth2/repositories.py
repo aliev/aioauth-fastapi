@@ -1,33 +1,89 @@
+from aioauth_fastapi.users.crypto import encode_jwt
+from aioauth_fastapi.users.tables import UserTable
 from typing import Optional
 from aioauth_fastapi.storage.db import Database
 from aioauth.requests import Request
 from aioauth.models import Token, AuthorizationCode, Client
-from .tables import ClientTable, TokenTable, AuthorizationCodeTable
+from .tables import ClientTable, AuthorizationCodeTable
 from sqlalchemy.future import select
 from aioauth.storage import BaseStorage
+from ..config import settings
 
 
 class OAuth2Repository(BaseStorage):
     def __init__(self, database: Database):
         self.database = database
 
-    async def save_token(self, token: Token) -> None:
-        token_record = TokenTable(**token._asdict())
+    async def create_token(self, request: Request, client_id: str, scope: str) -> Token:
+        q = select(AuthorizationCodeTable).where(
+            AuthorizationCodeTable.code == request.post.code
+        )
 
         async with self.database.session() as session:
-            session.add(token_record)
-            await session.commit()
+            results = await session.execute(q)
+            authorization_code_record = results.scalars().one_or_none()
+
+        user_id = authorization_code_record.user_id
+
+        q = select(UserTable).where(UserTable.id == user_id)
+
+        async with self.database.session() as session:
+            results = await session.execute(q)
+            user_record = results.scalars().one_or_none()
+
+        access_token = encode_jwt(
+            sub=str(user_record.id),
+            secret=settings.JWT_PRIVATE_KEY,
+            expires_delta=settings.ACCESS_TOKEN_EXP,
+            token_type="access",
+            additional_claims={
+                "is_blocked": user_record.is_blocked,
+                "is_superuser": user_record.is_superuser,
+                "username": user_record.username,
+            },
+        )
+
+        refresh_token = encode_jwt(
+            sub=str(user_record.id),
+            secret=settings.JWT_PRIVATE_KEY,
+            expires_delta=settings.REFRESH_TOKEN_EXP,
+            token_type="access",
+            additional_claims={
+                "is_blocked": user_record.is_blocked,
+                "is_superuser": user_record.is_superuser,
+                "username": user_record.username,
+            },
+        )
+
+        token = await super().create_token(request, client_id, scope)
+
+        token_params = {
+            **token._asdict(),
+            # Replace aioauth access/refresh tokens to JWT
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
+
+        return Token(**token_params)
+
+    async def save_token(self, request: Request, token: Token) -> None:
+        """
+        Whitelist refresh_token.
+        """
+
+    async def revoke_token(self, request: Request, refresh_token: str) -> None:
+        """
+        Remove refresh_token from whitelist.
+        """
 
     async def get_token(
         self,
         request: Request,
         client_id: str,
-        access_token: Optional[str],
-        refresh_token: Optional[str],
+        access_token: Optional[str] = None,
+        refresh_token: Optional[str] = None,
     ) -> Optional[Token]:
-        return await super().get_token(
-            request, client_id, access_token=access_token, refresh_token=refresh_token
-        )
+        ...
 
     async def get_id_token(
         self,
@@ -43,10 +99,13 @@ class OAuth2Repository(BaseStorage):
         )
 
     async def save_authorization_code(
-        self, authorization_code: AuthorizationCode
+        self, request: Request, authorization_code: AuthorizationCode
     ) -> None:
         authorization_code_record = AuthorizationCodeTable(
-            **authorization_code._asdict()
+            **{
+                **authorization_code._asdict(),
+                "user_id": request.user.id,
+            }
         )
 
         async with self.database.session() as session:
@@ -107,7 +166,3 @@ class OAuth2Repository(BaseStorage):
             one = results.scalars().one_or_none()
 
             await session.delete(one)
-            await session.commit()
-
-    async def revoke_token(self, request: Request, refresh_token: str) -> None:
-        return await super().revoke_token(request, refresh_token)
