@@ -10,4 +10,4 @@ wheel
 orjson==3.6.1
 python-jose[cryptography]==3.3.0
 dependency-injector==4.35.2
-aioauth==1.0.1
+aioauth==1.0.2

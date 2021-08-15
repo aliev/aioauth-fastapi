@@ -23,7 +23,7 @@ app.include_router(users_endpoint.router, prefix="/api/users", tags=["users"])
 
 # Define aioauth-fastapi endpoints
 app.include_router(
-    oauth2_endpoint.router(),
+    oauth2_endpoint.router,
     prefix="/oauth2",
     tags=["oauth2"],
 )

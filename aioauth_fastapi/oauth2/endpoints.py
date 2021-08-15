@@ -8,7 +8,7 @@ from aioauth.fastapi.router import get_oauth2_router
 
 
 @inject
-def router(
+def get_router(
     authorization_server: AuthorizationServer = Depends(
         Provide[ApplicationContainer.oauth2_package.authorization_server]
     ),
@@ -21,3 +21,6 @@ def router(
             INSECURE_TRANSPORT=settings.DEBUG,
         ),
     )
+
+
+router = get_router()
