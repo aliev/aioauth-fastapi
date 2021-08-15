@@ -19,10 +19,17 @@ class OAuth2Storage(BaseStorage):
         user = None
 
         if request.user:
-            # authorization flow
+            """
+            For /auhorize endpoint user must be auhtorized.
+            The current user can be taked from request.
+            """
             user = request.user
         else:
-            # for grant_type token
+            """
+            When request is coming directly from `/token` endpoint we don't have an
+            access to the owner (user) of an authorization_code.
+            The user must be taken from `AuthorizationCodeTable`.
+            """
             async with self.database.session() as session:
                 q = select(AuthorizationCodeTable).where(
                     AuthorizationCodeTable.code == request.post.code
@@ -41,6 +48,9 @@ class OAuth2Storage(BaseStorage):
         return user
 
     async def create_token(self, request: Request, client_id: str, scope: str) -> Token:
+        """
+        Create token and store it in database.
+        """
         user = await self.get_user(request)
 
         access_token, refresh_token = get_jwt(user)

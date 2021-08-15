@@ -5,7 +5,7 @@ from .models import AnonymousUser, User
 from starlette.authentication import AuthCredentials, AuthenticationBackend
 
 
-class JWTAuthBackend(AuthenticationBackend):
+class CookiesAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request):
         token: str = request.cookies.get("token")
 
