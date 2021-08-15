@@ -27,7 +27,7 @@ INSERT INTO client (
     '71569cc8-89ea-48c1-adb3-10f831020840', -- client_secret
     '{"authorization_code", "password", "client_credentials", "refresh_token"}', -- grant_types
     '{"token", "code", "none", "id_token"}', -- response_types
-    '{"https://oidcdebugger.com/debug"}', -- redirect_uris
+    '{"https://oidcdebugger.com/debug", "https://openidconnect.net/callback"}', -- redirect_uris
     'read write' -- scope
 );
 ```

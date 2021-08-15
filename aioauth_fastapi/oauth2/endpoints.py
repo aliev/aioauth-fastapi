@@ -21,6 +21,3 @@ def get_router(
             INSECURE_TRANSPORT=settings.DEBUG,
         ),
     )
-
-
-router = get_router()
