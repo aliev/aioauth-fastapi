@@ -1,3 +1,4 @@
+from aioauth.types import TokenType
 from aioauth_fastapi.users.crypto import get_jwt
 from aioauth_fastapi.users.tables import UserTable
 from typing import Optional
@@ -53,18 +54,15 @@ class OAuth2Repository(BaseStorage):
             "refresh_token": refresh_token,
         }
 
-        return Token(**token_params)
+        token_record_params = {**token_params, "user_id": request.user.id}
 
-    async def save_token(self, request: Request, token: Token) -> None:
-        token_record = TokenTable(
-            **{
-                **token._asdict(),
-                "user_id": request.user.id,
-            }
-        )
+        token_record = TokenTable(**token_record_params)
+
         async with self.database.session() as session:
             session.add(token_record)
             await session.commit()
+
+        return Token(**token_params)
 
     async def revoke_token(self, request: Request, refresh_token: str) -> None:
         """
@@ -77,25 +75,35 @@ class OAuth2Repository(BaseStorage):
         client_id: str,
         access_token: Optional[str] = None,
         refresh_token: Optional[str] = None,
+        token_type: Optional[str] = "refresh_token",
     ) -> Optional[Token]:
-        ...
+        if token_type == TokenType.REFRESH:
+            q = select(TokenTable).where(TokenTable.refresh_token == refresh_token)
+        else:
+            q = select(TokenTable).where(TokenTable.access_token == access_token)
 
-    async def get_id_token(
-        self,
-        request: Request,
-        client_id: str,
-        scope: str,
-        response_type: str,
-        redirect_uri: str,
-        nonce: str,
-    ) -> str:
-        return await super().get_id_token(
-            request, client_id, scope, response_type, redirect_uri, nonce
+        async with self.database.session() as session:
+            results = await session.execute(q)
+            one = results.scalars().one_or_none()
+
+        if one:
+            return Token(
+                access_token=one.access_token,
+                refresh_token=one.refresh_token,
+                scope=one.scope,
+                issued_at=one.issued_at,
+                expires_in=one.expires_in,
+                refresh_token_expires_in=one.refresh_token_expires_in,
+                client_id=client_id,
+            )
+
+    async def create_authorization_code(
+        self, request: Request, *args, **kwargs
+    ) -> AuthorizationCode:
+        authorization_code = await super().create_authorization_code(
+            request, *args, **kwargs
         )
 
-    async def save_authorization_code(
-        self, request: Request, authorization_code: AuthorizationCode
-    ) -> None:
         authorization_code_record = AuthorizationCodeTable(
             **{
                 **authorization_code._asdict(),
@@ -106,6 +114,8 @@ class OAuth2Repository(BaseStorage):
         async with self.database.session() as session:
             session.add(authorization_code_record)
             await session.commit()
+
+        return authorization_code
 
     async def get_client(
         self, request: Request, client_id: str, client_secret: Optional[str] = None
@@ -124,9 +134,6 @@ class OAuth2Repository(BaseStorage):
                 redirect_uris=one.redirect_uris,
                 scope=one.scope,
             )
-
-    async def authenticate(self, request: Request) -> bool:
-        return await super().authenticate(request)
 
     async def get_authorization_code(
         self, request: Request, client_id: str, code: str
