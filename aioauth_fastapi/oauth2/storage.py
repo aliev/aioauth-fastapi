@@ -11,7 +11,7 @@ from aioauth.storage import BaseStorage
 from ..users.models import User
 
 
-class OAuth2Repository(BaseStorage):
+class OAuth2Storage(BaseStorage):
     def __init__(self, database: Database):
         self.database = database
 

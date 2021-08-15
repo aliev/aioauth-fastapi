@@ -1,4 +1,3 @@
-from starlette.requests import Request
 from aioauth_fastapi.users.repositories import UserRepository
 from http import HTTPStatus
 
@@ -45,8 +44,3 @@ class UserService:
             )
 
         return Response(status_code=HTTPStatus.NO_CONTENT)
-
-    async def user_logout(self, request: Request) -> Response:
-        """
-        Remove refresh_token from whitelisted tokens.
-        """
