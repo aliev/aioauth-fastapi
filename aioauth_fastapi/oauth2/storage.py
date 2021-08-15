@@ -64,7 +64,7 @@ class OAuth2Storage(BaseStorage):
             "refresh_token": refresh_token,
         }
 
-        token_record_params = {**token_params, "user_id": request.user.id}
+        token_record_params = {**token_params, "user_id": user.id}
 
         token_record = TokenTable(**token_record_params)
 
