@@ -4,10 +4,12 @@ import hmac
 import math
 import secrets
 import string
-from typing import Dict
-from jose import jwt, constants
 import uuid
-from datetime import timedelta, timezone, datetime
+from datetime import datetime, timedelta, timezone
+from typing import Dict
+
+from jose import constants, jwt
+
 from ..config import settings
 
 RANDOM_STRING_CHARS = string.ascii_lowercase + string.ascii_uppercase + string.digits

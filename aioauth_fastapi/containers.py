@@ -1,8 +1,9 @@
-from .users.containers import UserContainer
-from .oauth2.containers import OAuth2Container
 from dependency_injector import containers, providers
+
 from .config import settings
+from .oauth2.containers import OAuth2Container
 from .storage.db import Database
+from .users.containers import UserContainer
 
 
 class ApplicationContainer(containers.DeclarativeContainer):

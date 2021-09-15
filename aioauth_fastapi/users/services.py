@@ -1,13 +1,13 @@
-from aioauth_fastapi.users.repositories import UserRepository
 from http import HTTPStatus
 
 from fastapi import HTTPException, Response
 
-from .exceptions import DuplicateUserException
-from .responses import TokenResponse
-from .requests import UserLoginRequest, UserRegistrationRequest
+from aioauth_fastapi.users.repositories import UserRepository
 
 from .crypto import get_jwt
+from .exceptions import DuplicateUserException
+from .requests import UserLoginRequest, UserRegistrationRequest
+from .responses import TokenResponse
 
 
 class UserService:

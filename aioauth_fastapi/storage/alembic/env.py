@@ -1,16 +1,14 @@
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import AsyncEngine
-from aioauth_fastapi.config import settings
-from aioauth_fastapi.storage.tables import *
-from aioauth_fastapi.users.tables import *
-from aioauth_fastapi.oauth2.tables import *
-
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlmodel import SQLModel
+
+from aioauth_fastapi.config import settings
+from aioauth_fastapi.oauth2.models import *  # noqa
+from aioauth_fastapi.users.models import *  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -26,7 +24,7 @@ config.set_main_option("sqlalchemy.url", str(settings.PSQL_DSN))
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata  # type: ignore
+target_metadata = SQLModel.metadata  # type: ignore
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

@@ -1,26 +1,27 @@
-from aioauth_fastapi.storage.db import Database
 from typing import Optional
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 
-from .exceptions import DuplicateUserException
+from aioauth_fastapi.storage.db import Database
 
-from ..users.tables import UserTable
+from ..users.models import User
+from .exceptions import DuplicateUserException
 
 
 class UserRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    async def get_user(self, username: str) -> Optional[UserTable]:
-        q = select(UserTable).where(UserTable.username == username)
+    async def get_user(self, username: str) -> Optional[User]:
+        q = select(User).where(User.username == username)
 
         async with self.database.session() as session:
             results = await session.execute(q)
             return results.scalars().one_or_none()
 
     async def create_user(self, **kwargs) -> None:
-        user = UserTable(**kwargs)
+        user = User(**kwargs)
 
         async with self.database.session() as session:
             session.add(user)

@@ -1,14 +1,18 @@
-from aioauth.types import TokenType
-from aioauth_fastapi.users.crypto import get_jwt
-from aioauth_fastapi.users.tables import UserTable
 from typing import Optional
-from aioauth_fastapi.storage.db import Database
+
+from aioauth.models import AuthorizationCode, Client, Token
 from aioauth.requests import Request
-from aioauth.models import Token, AuthorizationCode, Client
-from .tables import ClientTable, AuthorizationCodeTable, TokenTable
-from sqlalchemy.future import select
 from aioauth.storage import BaseStorage
+from aioauth.types import TokenType
+from sqlalchemy.future import select
+
+from aioauth_fastapi.storage.db import Database
+from aioauth_fastapi.users.crypto import get_jwt
+
 from ..users.models import User
+from .models import AuthorizationCode as AuthorizationCodeDB
+from .models import Client as ClientDB
+from .models import Token as TokenDB
 
 
 class OAuth2Storage(BaseStorage):
@@ -28,17 +32,17 @@ class OAuth2Storage(BaseStorage):
             """
             When request is coming directly from `/token` endpoint we don't have an
             access to the owner (user) of an authorization_code.
-            The user must be taken from `AuthorizationCodeTable`.
+            The user must be taken from `AuthorizationCodeDB`.
             """
             async with self.database.session() as session:
-                q = select(AuthorizationCodeTable).where(
-                    AuthorizationCodeTable.code == request.post.code
+                q = select(AuthorizationCodeDB).where(
+                    AuthorizationCodeDB.code == request.post.code
                 )
                 results = await session.execute(q)
                 authorization_code_record = results.scalars().one_or_none()
                 user_id = authorization_code_record.user_id
 
-                q = select(UserTable).where(UserTable.id == user_id)
+                q = select(User).where(User.id == user_id)
 
                 results = await session.execute(q)
                 user_record = results.scalars().one_or_none()
@@ -66,7 +70,7 @@ class OAuth2Storage(BaseStorage):
 
         token_record_params = {**token_params, "user_id": user.id}
 
-        token_record = TokenTable(**token_record_params)
+        token_record = TokenDB(**token_record_params)
 
         async with self.database.session() as session:
             session.add(token_record)
@@ -88,9 +92,9 @@ class OAuth2Storage(BaseStorage):
         token_type: Optional[str] = "refresh_token",
     ) -> Optional[Token]:
         if token_type == TokenType.REFRESH:
-            q = select(TokenTable).where(TokenTable.refresh_token == refresh_token)
+            q = select(TokenDB).where(TokenDB.refresh_token == refresh_token)
         else:
-            q = select(TokenTable).where(TokenTable.access_token == access_token)
+            q = select(TokenDB).where(TokenDB.access_token == access_token)
 
         async with self.database.session() as session:
             results = await session.execute(q)
@@ -114,7 +118,7 @@ class OAuth2Storage(BaseStorage):
             request, *args, **kwargs
         )
 
-        authorization_code_record = AuthorizationCodeTable(
+        authorization_code_record = AuthorizationCodeDB(
             **{
                 **authorization_code._asdict(),
                 "user_id": request.user.id,
@@ -130,7 +134,7 @@ class OAuth2Storage(BaseStorage):
     async def get_client(
         self, request: Request, client_id: str, client_secret: Optional[str] = None
     ) -> Optional[Client]:
-        q = select(ClientTable).where(ClientTable.client_id == client_id)
+        q = select(ClientDB).where(ClientDB.client_id == client_id)
         async with self.database.session() as session:
             results = await session.execute(q)
             one = results.scalars().one_or_none()
@@ -148,7 +152,7 @@ class OAuth2Storage(BaseStorage):
     async def get_authorization_code(
         self, request: Request, client_id: str, code: str
     ) -> Optional[AuthorizationCode]:
-        q = select(AuthorizationCodeTable).where(AuthorizationCodeTable.code == code)
+        q = select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
 
         async with self.database.session() as session:
             results = await session.execute(q)
@@ -171,7 +175,7 @@ class OAuth2Storage(BaseStorage):
     async def delete_authorization_code(
         self, request: Request, client_id: str, code: str
     ) -> None:
-        q = select(AuthorizationCodeTable).where(AuthorizationCodeTable.code == code)
+        q = select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
 
         async with self.database.session() as session:
             results = await session.execute(q)

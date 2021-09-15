@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from .users.backends import CookiesAuthenticationBackend
+from starlette.middleware.authentication import AuthenticationMiddleware
+
 from .config import settings
 from .containers import ApplicationContainer
-from .users import endpoints as users_endpoint
 from .oauth2 import endpoints as oauth2_endpoint
-from starlette.middleware.authentication import AuthenticationMiddleware
+from .users import endpoints as users_endpoint
+from .users.backends import CookiesAuthenticationBackend
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

@@ -1,5 +1,6 @@
-from dependency_injector import containers, providers
 from aioauth.server import AuthorizationServer
+from dependency_injector import containers, providers
+
 from .storage import OAuth2Storage
 
 

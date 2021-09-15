@@ -1,6 +1,6 @@
 import uvicorn
-from aioauth_fastapi.config import settings
 
+from aioauth_fastapi.config import settings
 
 if __name__ == "__main__":
     uvicorn.run(

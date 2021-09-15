@@ -13,3 +13,4 @@ dependency-injector==4.35.2
 aioauth==1.0.3
 python-multipart==0.0.5
 alembic==1.6.5
+sqlmodel==0.0.4
