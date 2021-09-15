@@ -22,6 +22,7 @@ class UserRepository:
 
     async def create_user(self, **kwargs) -> None:
         user = User(**kwargs)
+        user.set_password(kwargs.get("password"))
 
         async with self.database.session() as session:
             session.add(user)
