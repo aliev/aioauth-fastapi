@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import BaseModel
-from sqlmodel.main import Relationship
+from sqlmodel.main import Field, Relationship
 
 from aioauth_fastapi.storage.models import BaseTable
 from aioauth_fastapi.users.crypto import make_random_password, pbkdf2, verify
@@ -17,11 +17,13 @@ class UserAnonymous(BaseModel):
 
 
 class User(BaseTable, table=True):  # type: ignore
+    __tablename__ = "users"
+
     is_superuser: bool = False
     is_blocked: bool = False
     is_active: bool = False
 
-    username: str
+    username: str = Field(nullable=False, sa_column_kwargs={"unique": True}, index=True)
     password: Optional[str] = None
 
     user_clients: List["Client"] = Relationship(back_populates="user")

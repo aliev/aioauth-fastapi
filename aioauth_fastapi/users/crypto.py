@@ -124,7 +124,7 @@ def get_jwt(user):
         sub=str(user.id),
         secret=settings.JWT_PRIVATE_KEY,
         expires_delta=settings.REFRESH_TOKEN_EXP,
-        token_type="access",
+        token_type="refresh",
         additional_claims={
             "is_blocked": user.is_blocked,
             "is_superuser": user.is_superuser,

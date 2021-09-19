@@ -1,10 +1,12 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from pydantic.types import UUID4
 from sqlmodel.main import Field, Relationship
 
 from ..storage.models import BaseTable
-from ..users.models import User
+
+if TYPE_CHECKING:
+    from ..users.models import User
 
 
 class Client(BaseTable, table=True):  # type: ignore
@@ -15,8 +17,8 @@ class Client(BaseTable, table=True):  # type: ignore
     redirect_uris: List[str]
     scope: str
 
-    user_id: UUID4 = Field(foreign_key="user.id", nullable=False)
-    user: User = Relationship(back_populates="user_clients")
+    user_id: UUID4 = Field(foreign_key="users.id", nullable=False)
+    user: "User" = Relationship(back_populates="user_clients")
 
 
 class AuthorizationCode(BaseTable, table=True):  # type: ignore
@@ -31,8 +33,8 @@ class AuthorizationCode(BaseTable, table=True):  # type: ignore
     code_challenge_method: str
     nonce: str
 
-    user_id: UUID4 = Field(foreign_key="user.id", nullable=False)
-    user: User = Relationship(back_populates="user_authorization_codes")
+    user_id: UUID4 = Field(foreign_key="users.id", nullable=False)
+    user: "User" = Relationship(back_populates="user_authorization_codes")
 
 
 class Token(BaseTable, table=True):  # type: ignore
@@ -46,5 +48,5 @@ class Token(BaseTable, table=True):  # type: ignore
     token_type: str
     revoked: bool
 
-    user_id: UUID4 = Field(foreign_key="user.id", nullable=False)
-    user: User = Relationship(back_populates="user_tokens")
+    user_id: UUID4 = Field(foreign_key="users.id", nullable=False)
+    user: "User" = Relationship(back_populates="user_tokens")

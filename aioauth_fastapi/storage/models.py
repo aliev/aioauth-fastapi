@@ -10,4 +10,5 @@ class BaseTable(SQLModel):
         default=uuid.uuid4(),
         nullable=False,
         index=True,
+        sa_column_kwargs={"unique": True},
     )

@@ -35,6 +35,7 @@ Create client for demo
 ```sql
 INSERT INTO client (
     id,
+    user_id,
     client_id,
     client_secret,
     grant_types,
@@ -43,6 +44,7 @@ INSERT INTO client (
     scope
 ) VALUES (
     '3b23a838-b92d-409f-b49b-a1d9cb675c29', -- id
+    'c64eb959-e621-4ada-80db-5d5210bea177',
     'be861a8a-7817-4a9e-93d3-9976bf099893', -- client_id
     '71569cc8-89ea-48c1-adb3-10f831020840', -- client_secret
     '{"authorization_code", "password", "client_credentials", "refresh_token"}', -- grant_types

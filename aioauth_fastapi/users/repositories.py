@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
-
+from sqlalchemy.orm import selectinload
 from aioauth_fastapi.storage.db import Database
 
 from ..users.models import User
@@ -14,11 +14,19 @@ class UserRepository:
         self.database = database
 
     async def get_user(self, username: str) -> Optional[User]:
-        q = select(User).where(User.username == username)
+        q = (
+            select(User)
+            .options(
+                # for relationship loading, eager loading should be applied.
+                selectinload(User.user_tokens)
+            )
+            .where(User.username == username)
+        )
 
         async with self.database.session() as session:
             results = await session.execute(q)
-            return results.scalars().one_or_none()
+            user = results.scalars().one_or_none()
+            return user
 
     async def create_user(self, **kwargs) -> None:
         user = User(**kwargs)
