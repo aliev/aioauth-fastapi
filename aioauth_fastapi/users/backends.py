@@ -1,5 +1,4 @@
-import jwt
-from jwt.exceptions import DecodeError, PyJWTError
+from aioauth_fastapi.users.crypto import authenticate
 from starlette.authentication import AuthCredentials, AuthenticationBackend
 
 from ..config import settings
@@ -15,10 +14,9 @@ class CookiesAuthenticationBackend(AuthenticationBackend):
 
         key = settings.JWT_PUBLIC_KEY
 
-        try:
-            token_header = jwt.get_unverified_header(token)
-            decoded_token = jwt.decode(token, key, algorithms=token_header.get("alg"))
-        except (PyJWTError, DecodeError):
-            return AuthCredentials(), UserAnonymous()
-        else:
-            return AuthCredentials(), User(id=decoded_token.get("sub"), **decoded_token)
+        is_authenticated, decoded_token = authenticate(token=token, key=key)
+
+        if is_authenticated:
+            AuthCredentials(), User(**decoded_token)
+
+        return AuthCredentials(), UserAnonymous()

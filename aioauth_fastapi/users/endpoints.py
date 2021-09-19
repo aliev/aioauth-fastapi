@@ -10,7 +10,7 @@ from .requests import UserLoginRequest, UserRegistrationRequest
 router = APIRouter()
 
 
-@router.post("/registration")
+@router.post("/registration", name="users:registration")
 @inject
 async def user_registration(
     body: UserRegistrationRequest,
@@ -21,7 +21,7 @@ async def user_registration(
     return await user_service.user_registration(body)
 
 
-@router.post("/login")
+@router.post("/login", name="users:login")
 @inject
 async def user_login(
     response: Response,

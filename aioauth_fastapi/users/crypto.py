@@ -5,8 +5,9 @@ import math
 import secrets
 import string
 import uuid
+from jose.exceptions import JWTError
 from datetime import datetime, timedelta, timezone
-from typing import Dict
+from typing import Dict, Tuple
 
 from jose import constants, jwt
 
@@ -133,3 +134,18 @@ def get_jwt(user):
     )
 
     return access_token, refresh_token
+
+
+def authenticate(
+    *,
+    token: str,
+    key: str,
+) -> Tuple[bool, Dict]:
+    """Authenticate user by token"""
+    try:
+        token_header = jwt.get_unverified_header(token)
+        decoded_token = jwt.decode(token, key, algorithms=token_header.get("alg"))
+    except JWTError:
+        return False, {}
+    else:
+        return True, decoded_token
