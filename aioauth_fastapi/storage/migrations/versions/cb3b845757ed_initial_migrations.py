@@ -1,8 +1,8 @@
 """Initial migrations
 
-Revision ID: d318bd6647e8
+Revision ID: cb3b845757ed
 Revises:
-Create Date: 2021-09-19 12:23:41.123118
+Create Date: 2021-09-26 23:36:20.825640
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision = "d318bd6647e8"
+revision = "cb3b845757ed"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -47,11 +47,11 @@ def upgrade():
         sa.Column("scope", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("auth_time", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("expires_in", sa.Integer(), nullable=False),
-        sa.Column("code_challenge", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("code_challenge", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column(
-            "code_challenge_method", sqlmodel.sql.sqltypes.AutoString(), nullable=False
+            "code_challenge_method", sqlmodel.sql.sqltypes.AutoString(), nullable=True
         ),
-        sa.Column("nonce", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("nonce", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("user_id", sqlmodel.sql.sqltypes.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
@@ -121,12 +121,12 @@ def upgrade():
     )
     op.create_table(
         "client",
+        sa.Column("grant_types", sa.ARRAY(sa.String()), nullable=True),
+        sa.Column("response_types", sa.ARRAY(sa.String()), nullable=True),
+        sa.Column("redirect_uris", sa.ARRAY(sa.String()), nullable=True),
         sa.Column("id", sqlmodel.sql.sqltypes.GUID(), nullable=False),
         sa.Column("client_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("client_secret", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("grant_types", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("response_types", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("redirect_uris", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("scope", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("user_id", sqlmodel.sql.sqltypes.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
@@ -139,16 +139,7 @@ def upgrade():
     op.create_index(
         op.f("ix_client_client_secret"), "client", ["client_secret"], unique=False
     )
-    op.create_index(
-        op.f("ix_client_grant_types"), "client", ["grant_types"], unique=False
-    )
     op.create_index(op.f("ix_client_id"), "client", ["id"], unique=True)
-    op.create_index(
-        op.f("ix_client_redirect_uris"), "client", ["redirect_uris"], unique=False
-    )
-    op.create_index(
-        op.f("ix_client_response_types"), "client", ["response_types"], unique=False
-    )
     op.create_index(op.f("ix_client_scope"), "client", ["scope"], unique=False)
     op.create_index(op.f("ix_client_user_id"), "client", ["user_id"], unique=False)
     op.create_table(
@@ -209,10 +200,7 @@ def downgrade():
     op.drop_table("token")
     op.drop_index(op.f("ix_client_user_id"), table_name="client")
     op.drop_index(op.f("ix_client_scope"), table_name="client")
-    op.drop_index(op.f("ix_client_response_types"), table_name="client")
-    op.drop_index(op.f("ix_client_redirect_uris"), table_name="client")
     op.drop_index(op.f("ix_client_id"), table_name="client")
-    op.drop_index(op.f("ix_client_grant_types"), table_name="client")
     op.drop_index(op.f("ix_client_client_secret"), table_name="client")
     op.drop_index(op.f("ix_client_client_id"), table_name="client")
     op.drop_table("client")

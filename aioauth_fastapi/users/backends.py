@@ -17,6 +17,6 @@ class CookiesAuthenticationBackend(AuthenticationBackend):
         is_authenticated, decoded_token = authenticate(token=token, key=key)
 
         if is_authenticated:
-            AuthCredentials(), User(**decoded_token)
+            return AuthCredentials(), User(**decoded_token)
 
         return AuthCredentials(), UserAnonymous()

@@ -1,5 +1,8 @@
+import logging
+from aioauth_fastapi.config import Settings
+from aioauth_fastapi.storage.db import Database
 from typing import TYPE_CHECKING
-from async_asgi_testclient import TestClient
+from httpx import AsyncClient
 import pytest
 from alembic.config import main
 from Crypto.PublicKey import RSA
@@ -12,16 +15,20 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(autouse=True)
-def settings(monkeypatch):
-    monkeypatch.setenv("JWT_PUBLIC_KEY", rsa.public_key().export_key().decode())
-    monkeypatch.setenv("JWT_PRIVATE_KEY", rsa.export_key().decode())
-    monkeypatch.setenv(
-        "PSQL_DSN", "postgresql+asyncpg://ali@localhost/aioauth_fastapi_test"
-    )
+def settings():
+    from aioauth_fastapi.config import settings as _settings
+
+    return _settings
 
 
 @pytest.fixture(autouse=True)
-def migrations(settings):
+def migrations():
+    logger = logging.getLogger("alembic.runtime.migration")
+    logger.disabled = True
+
+    logger = logging.getLogger("sqlalchemy.engine.Engine")
+    logger.disabled = True
+
     # Run migrations
     main(["--raiseerr", "upgrade", "head"])
     yield
@@ -37,7 +44,12 @@ def app() -> "FastAPI":
 
 
 @pytest.fixture
+def db(settings: Settings) -> Database:
+    return Database(settings.PSQL_DSN)
+
+
+@pytest.fixture
 @pytest.mark.asyncio
 async def client(app: "FastAPI"):
-    async with TestClient(app) as client:
+    async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
