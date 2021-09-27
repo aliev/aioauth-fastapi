@@ -45,9 +45,7 @@ class OAuth2Storage(BaseStorage):
                 q = select(User).where(User.id == user_id)
 
                 results = await session.execute(q)
-                user_record = results.scalars().one_or_none()
-
-                user = User.from_orm(user_record)
+                user = results.scalars().one_or_none()
 
         return user
 
