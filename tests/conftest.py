@@ -10,7 +10,7 @@ from Crypto.PublicKey import RSA
 rsa = RSA.generate(2048)
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from fastapi.applications import FastAPI
 
 

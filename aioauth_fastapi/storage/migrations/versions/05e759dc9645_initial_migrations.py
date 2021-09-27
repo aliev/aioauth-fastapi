@@ -1,8 +1,8 @@
 """Initial migrations
 
-Revision ID: cb3b845757ed
+Revision ID: 05e759dc9645
 Revises:
-Create Date: 2021-09-26 23:36:20.825640
+Create Date: 2021-09-27 17:11:05.223404
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision = "cb3b845757ed"
+revision = "05e759dc9645"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,7 +45,7 @@ def upgrade():
         sa.Column("redirect_uri", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("response_type", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("scope", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("auth_time", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("auth_time", sa.Integer(), nullable=False),
         sa.Column("expires_in", sa.Integer(), nullable=False),
         sa.Column("code_challenge", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column(

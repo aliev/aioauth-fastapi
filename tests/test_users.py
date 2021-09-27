@@ -3,7 +3,7 @@ from http import HTTPStatus
 import pytest
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from httpx import AsyncClient
     from fastapi import FastAPI
 

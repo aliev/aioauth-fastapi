@@ -7,7 +7,7 @@ from sqlmodel import ARRAY, String
 
 from ..storage.models import BaseTable
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ..users.models import User
 
 
@@ -30,7 +30,7 @@ class AuthorizationCode(BaseTable, table=True):  # type: ignore
     redirect_uri: str
     response_type: str
     scope: str
-    auth_time: str
+    auth_time: int
     expires_in: int
     code_challenge: Optional[str]
     code_challenge_method: Optional[str]

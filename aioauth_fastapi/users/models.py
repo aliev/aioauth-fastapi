@@ -6,7 +6,7 @@ from sqlmodel.main import Field, Relationship
 from aioauth_fastapi.storage.models import BaseTable
 from aioauth_fastapi.users.crypto import make_random_password, pbkdf2, verify
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ..oauth2.models import AuthorizationCode, Client, Token
 
 
