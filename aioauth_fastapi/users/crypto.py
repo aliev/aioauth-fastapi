@@ -118,6 +118,7 @@ def get_jwt(user):
             "is_blocked": user.is_blocked,
             "is_superuser": user.is_superuser,
             "username": user.username,
+            "is_active": user.is_active,
         },
     )
 
@@ -130,6 +131,7 @@ def get_jwt(user):
             "is_blocked": user.is_blocked,
             "is_superuser": user.is_superuser,
             "username": user.username,
+            "is_active": user.is_active,
         },
     )
 

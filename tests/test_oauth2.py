@@ -50,6 +50,20 @@ async def test_authorization_code_flow(
 
     assert "access_token" in response.json()
 
+    refresh_token = response.json()["refresh_token"]
+
+    response = await http_client.post(
+        "/oauth2/token",
+        data={
+            "grant_type": GrantType.TYPE_REFRESH_TOKEN.value,
+            "refresh_token": refresh_token,
+            "client_id": client.client_id,
+            "client_secret": client.client_secret,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
 
 @pytest.mark.asyncio
 async def test_implicit_flow(

@@ -3,8 +3,9 @@ from typing import Optional
 from aioauth.models import AuthorizationCode, Client, Token
 from aioauth.requests import Request
 from aioauth.storage import BaseStorage
-from aioauth.types import TokenType
+from aioauth.types import GrantType, ResponseType, TokenType
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 from aioauth_fastapi.storage.db import Database
 from aioauth_fastapi.users.crypto import get_jwt
@@ -22,18 +23,12 @@ class OAuth2Storage(BaseStorage):
     async def get_user(self, request: Request):
         user = None
 
-        if request.user:
-            """
-            For /auhorize endpoint user must be auhtorized.
-            The current user can be taked from request.
-            """
+        if request.query.response_type == ResponseType.TYPE_TOKEN:
+            # If ResponseType is token get the user from current session
             user = request.user
-        else:
-            """
-            When request is coming directly from `/token` endpoint we don't have an
-            access to the owner (user) of an authorization_code.
-            The user must be taken from `AuthorizationCodeDB`.
-            """
+
+        if request.post.grant_type == GrantType.TYPE_AUTHORIZATION_CODE:
+            # If GrantType is authorization code get user from DB by code
             async with self.database.session() as session:
                 q = select(AuthorizationCodeDB).where(
                     AuthorizationCodeDB.code == request.post.code
@@ -46,6 +41,20 @@ class OAuth2Storage(BaseStorage):
 
                 results = await session.execute(q)
                 user = results.scalars().one_or_none()
+
+        if request.post.grant_type == GrantType.TYPE_REFRESH_TOKEN:
+            # Get user from token
+            q = select(TokenDB).where(
+                TokenDB.refresh_token == request.post.refresh_token
+            )
+            q = q.where(TokenDB.revoked == False)  # noqa
+            q = q.options(selectinload(TokenDB.user))
+
+            async with self.database.session() as session:
+                results = await session.execute(q)
+                token = results.scalars().one_or_none()
+
+                user = token.user
 
         return user
 
@@ -93,6 +102,9 @@ class OAuth2Storage(BaseStorage):
             q = select(TokenDB).where(TokenDB.refresh_token == refresh_token)
         else:
             q = select(TokenDB).where(TokenDB.access_token == access_token)
+
+        q = q.where(TokenDB.revoked == False)  # noqa
+        q = q.options(selectinload(TokenDB.user))
 
         async with self.database.session() as session:
             results = await session.execute(q)
