@@ -16,7 +16,7 @@ from .models import Client as ClientDB
 from .models import Token as TokenDB
 
 
-class OAuth2Storage(BaseStorage):
+class OAuth2Repository(BaseStorage):
     def __init__(self, database: Database):
         self.database = database
 
