@@ -67,7 +67,9 @@ class OAuth2Storage(BaseStorage):
 
         return user
 
-    async def create_token(self, request: Request, client_id: str, scope: str) -> Token:
+    async def create_token(
+        self, request: Request, client_id: str, scope: str, *args, **kwargs
+    ) -> Token:
         """
         Create token and store it in database.
         """
@@ -75,22 +77,26 @@ class OAuth2Storage(BaseStorage):
 
         access_token, refresh_token = get_jwt(user)
 
-        token = await super().create_token(request, client_id, scope)
+        token = await super().create_token(
+            request, client_id, scope, access_token, refresh_token
+        )
 
-        token_params = {
-            **token._asdict(),
-            # Replace aioauth access/refresh tokens to JWT
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-        }
-
-        token_record_params = {**token_params, "user_id": user.id}
-
-        token_record = TokenDB(**token_record_params)
+        token_record = TokenDB(
+            access_token=token.access_token,
+            refresh_token=token.refresh_token,
+            scope=token.scope,
+            issued_at=token.issued_at,
+            expires_in=token.expires_in,
+            refresh_token_expires_in=token.refresh_token_expires_in,
+            client_id=token.client_id,
+            token_type=token.token_type,
+            revoked=token.revoked,
+            user_id=user.id,
+        )
 
         await self.database.add(token_record)
 
-        return Token(**token_params)
+        return token
 
     async def revoke_token(self, request: Request, refresh_token: str) -> None:
         """
@@ -138,10 +144,17 @@ class OAuth2Storage(BaseStorage):
         )
 
         authorization_code_record = AuthorizationCodeDB(
-            **{
-                **authorization_code._asdict(),
-                "user_id": request.user.id,
-            }
+            code=authorization_code.code,
+            client_id=authorization_code.client_id,
+            redirect_uri=authorization_code.redirect_uri,
+            response_type=authorization_code.response_type,
+            scope=authorization_code.scope,
+            auth_time=authorization_code.auth_time,
+            expires_in=authorization_code.expires_in,
+            code_challenge_method=authorization_code.code_challenge_method,
+            code_challenge=authorization_code.code_challenge,
+            nonce=authorization_code.nonce,
+            user_id=request.user.id,
         )
 
         await self.database.add(authorization_code_record)
@@ -158,15 +171,17 @@ class OAuth2Storage(BaseStorage):
         client_record: Optional[ClientDB]
         client_record = q_results.one_or_none()
 
-        if client_record:
-            return Client(
-                client_id=client_record.client_id,
-                client_secret=client_record.client_secret,
-                grant_types=client_record.grant_types,
-                response_types=client_record.response_types,
-                redirect_uris=client_record.redirect_uris,
-                scope=client_record.scope,
-            )
+        if not client_record:
+            return None
+
+        return Client(
+            client_id=client_record.client_id,
+            client_secret=client_record.client_secret,
+            grant_types=client_record.grant_types,
+            response_types=client_record.response_types,
+            redirect_uris=client_record.redirect_uris,
+            scope=client_record.scope,
+        )
 
     async def get_authorization_code(
         self, request: Request, client_id: str, code: str
@@ -178,19 +193,21 @@ class OAuth2Storage(BaseStorage):
         authorization_code_record: Optional[AuthorizationCode]
         authorization_code_record = q_results.one_or_none()
 
-        if authorization_code_record is not None:
-            return AuthorizationCode(
-                code=authorization_code_record.code,
-                client_id=authorization_code_record.client_id,
-                redirect_uri=authorization_code_record.redirect_uri,
-                response_type=authorization_code_record.response_type,
-                scope=authorization_code_record.scope,
-                auth_time=authorization_code_record.auth_time,
-                expires_in=authorization_code_record.expires_in,
-                code_challenge=authorization_code_record.code_challenge,
-                code_challenge_method=authorization_code_record.code_challenge_method,
-                nonce=authorization_code_record.nonce,
-            )
+        if not authorization_code_record:
+            return None
+
+        return AuthorizationCode(
+            code=authorization_code_record.code,
+            client_id=authorization_code_record.client_id,
+            redirect_uri=authorization_code_record.redirect_uri,
+            response_type=authorization_code_record.response_type,
+            scope=authorization_code_record.scope,
+            auth_time=authorization_code_record.auth_time,
+            expires_in=authorization_code_record.expires_in,
+            code_challenge=authorization_code_record.code_challenge,
+            code_challenge_method=authorization_code_record.code_challenge_method,
+            nonce=authorization_code_record.nonce,
+        )
 
     async def delete_authorization_code(
         self, request: Request, client_id: str, code: str
