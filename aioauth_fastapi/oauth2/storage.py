@@ -52,7 +52,6 @@ class OAuth2Storage(BaseStorage):
             q_results = await self.database.select(
                 select(TokenDB)
                 .where(TokenDB.refresh_token == request.post.refresh_token)
-                .where(TokenDB.revoked == False)  # noqa
                 .options(selectinload(TokenDB.user))
             )
 
@@ -102,6 +101,15 @@ class OAuth2Storage(BaseStorage):
         """
         Remove refresh_token from whitelist.
         """
+        q_results = await self.database.select(
+            select(TokenDB).where(TokenDB.refresh_token == refresh_token)
+        )
+        token_record: Optional[TokenDB]
+        token_record = q_results.one_or_none()
+
+        if token_record:
+            token_record.revoked = True
+            await self.database.add(token_record)
 
     async def get_token(
         self,

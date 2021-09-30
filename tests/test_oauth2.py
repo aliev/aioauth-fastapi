@@ -64,6 +64,20 @@ async def test_authorization_code_flow(
 
     assert response.status_code == HTTPStatus.OK
 
+    # re-try token revokation with revoked token should be rejected
+    response = await http_client.post(
+        "/oauth2/token",
+        data={
+            "grant_type": GrantType.TYPE_REFRESH_TOKEN.value,
+            "refresh_token": refresh_token,
+            "client_id": client.client_id,
+            "client_secret": client.client_secret,
+        },
+    )
+    assert (
+        response.status_code == HTTPStatus.BAD_REQUEST
+    ), "re-try token revokation with revoked token should be rejected"
+
 
 @pytest.mark.asyncio
 async def test_implicit_flow(
