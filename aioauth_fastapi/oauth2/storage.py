@@ -21,7 +21,7 @@ class OAuth2Storage(BaseStorage):
         self.database = database
 
     async def get_user(self, request: Request):
-        user = None
+        user: Optional[User] = None
 
         if request.query.response_type == ResponseType.TYPE_TOKEN:
             # If ResponseType is token get the user from current session
@@ -29,32 +29,41 @@ class OAuth2Storage(BaseStorage):
 
         if request.post.grant_type == GrantType.TYPE_AUTHORIZATION_CODE:
             # If GrantType is authorization code get user from DB by code
-            async with self.database.session() as session:
-                q = select(AuthorizationCodeDB).where(
+            q_results = await self.database.select(
+                select(AuthorizationCodeDB).where(
                     AuthorizationCodeDB.code == request.post.code
                 )
-                results = await session.execute(q)
-                authorization_code_record = results.scalars().one_or_none()
-                user_id = authorization_code_record.user_id
+            )
 
-                q = select(User).where(User.id == user_id)
+            authorization_code: Optional[AuthorizationCodeDB]
+            authorization_code = q_results.one_or_none()
 
-                results = await session.execute(q)
-                user = results.scalars().one_or_none()
+            if not authorization_code:
+                return
+
+            q_results = await self.database.select(
+                select(User).where(User.id == authorization_code.user_id)
+            )
+
+            user = q_results.one_or_none()
 
         if request.post.grant_type == GrantType.TYPE_REFRESH_TOKEN:
             # Get user from token
-            q = select(TokenDB).where(
-                TokenDB.refresh_token == request.post.refresh_token
+            q_results = await self.database.select(
+                select(TokenDB)
+                .where(TokenDB.refresh_token == request.post.refresh_token)
+                .where(TokenDB.revoked == False)  # noqa
+                .options(selectinload(TokenDB.user))
             )
-            q = q.where(TokenDB.revoked == False)  # noqa
-            q = q.options(selectinload(TokenDB.user))
 
-            async with self.database.session() as session:
-                results = await session.execute(q)
-                token = results.scalars().one_or_none()
+            token: Optional[TokenDB]
 
-                user = token.user
+            token = q_results.one_or_none()
+
+            if not token:
+                return
+
+            user = token.user
 
         return user
 
@@ -79,9 +88,7 @@ class OAuth2Storage(BaseStorage):
 
         token_record = TokenDB(**token_record_params)
 
-        async with self.database.session() as session:
-            session.add(token_record)
-            await session.commit()
+        await self.database.add(token_record)
 
         return Token(**token_params)
 
@@ -103,21 +110,23 @@ class OAuth2Storage(BaseStorage):
         else:
             q = select(TokenDB).where(TokenDB.access_token == access_token)
 
-        q = q.where(TokenDB.revoked == False)  # noqa
-        q = q.options(selectinload(TokenDB.user))
+        q_results = await self.database.select(
+            q.where(TokenDB.revoked == False).options(  # noqa
+                selectinload(TokenDB.user)
+            )
+        )
 
-        async with self.database.session() as session:
-            results = await session.execute(q)
-            one = results.scalars().one_or_none()
+        token_record: Optional[TokenDB]
+        token_record = q_results.one_or_none()
 
-        if one:
+        if token_record:
             return Token(
-                access_token=one.access_token,
-                refresh_token=one.refresh_token,
-                scope=one.scope,
-                issued_at=one.issued_at,
-                expires_in=one.expires_in,
-                refresh_token_expires_in=one.refresh_token_expires_in,
+                access_token=token_record.access_token,
+                refresh_token=token_record.refresh_token,
+                scope=token_record.scope,
+                issued_at=token_record.issued_at,
+                expires_in=token_record.expires_in,
+                refresh_token_expires_in=token_record.refresh_token_expires_in,
                 client_id=client_id,
             )
 
@@ -135,60 +144,62 @@ class OAuth2Storage(BaseStorage):
             }
         )
 
-        async with self.database.session() as session:
-            session.add(authorization_code_record)
-            await session.commit()
+        await self.database.add(authorization_code_record)
 
         return authorization_code
 
     async def get_client(
         self, request: Request, client_id: str, client_secret: Optional[str] = None
     ) -> Optional[Client]:
-        q = select(ClientDB).where(ClientDB.client_id == client_id)
-        async with self.database.session() as session:
-            results = await session.execute(q)
-            one = results.scalars().one_or_none()
+        q_results = await self.database.select(
+            select(ClientDB).where(ClientDB.client_id == client_id)
+        )
 
-        if one is not None:
+        client_record: Optional[ClientDB]
+        client_record = q_results.one_or_none()
+
+        if client_record:
             return Client(
-                client_id=one.client_id,
-                client_secret=one.client_secret,
-                grant_types=one.grant_types,
-                response_types=one.response_types,
-                redirect_uris=one.redirect_uris,
-                scope=one.scope,
+                client_id=client_record.client_id,
+                client_secret=client_record.client_secret,
+                grant_types=client_record.grant_types,
+                response_types=client_record.response_types,
+                redirect_uris=client_record.redirect_uris,
+                scope=client_record.scope,
             )
 
     async def get_authorization_code(
         self, request: Request, client_id: str, code: str
     ) -> Optional[AuthorizationCode]:
-        q = select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
+        q_results = await self.database.select(
+            select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
+        )
 
-        async with self.database.session() as session:
-            results = await session.execute(q)
-            one = results.scalars().one_or_none()
+        authorization_code_record: Optional[AuthorizationCode]
+        authorization_code_record = q_results.one_or_none()
 
-        if one is not None:
+        if authorization_code_record is not None:
             return AuthorizationCode(
-                code=one.code,
-                client_id=one.client_id,
-                redirect_uri=one.redirect_uri,
-                response_type=one.response_type,
-                scope=one.scope,
-                auth_time=one.auth_time,
-                expires_in=one.expires_in,
-                code_challenge=one.code_challenge,
-                code_challenge_method=one.code_challenge_method,
-                nonce=one.nonce,
+                code=authorization_code_record.code,
+                client_id=authorization_code_record.client_id,
+                redirect_uri=authorization_code_record.redirect_uri,
+                response_type=authorization_code_record.response_type,
+                scope=authorization_code_record.scope,
+                auth_time=authorization_code_record.auth_time,
+                expires_in=authorization_code_record.expires_in,
+                code_challenge=authorization_code_record.code_challenge,
+                code_challenge_method=authorization_code_record.code_challenge_method,
+                nonce=authorization_code_record.nonce,
             )
 
     async def delete_authorization_code(
         self, request: Request, client_id: str, code: str
     ) -> None:
-        q = select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
+        q_results = await self.database.select(
+            select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
+        )
 
-        async with self.database.session() as session:
-            results = await session.execute(q)
-            one = results.scalars().one_or_none()
+        authorization_code: Optional[AuthorizationCodeDB]
+        authorization_code = q_results.one_or_none()
 
-            await session.delete(one)
+        await self.database.delete(authorization_code)

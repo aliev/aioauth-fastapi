@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.engine.result import ScalarResult
+from sqlalchemy.sql.selectable import Select
 from sqlalchemy.pool import NullPool
 
 
@@ -25,3 +27,17 @@ class Database:
                     raise
                 finally:
                     await session.close()
+
+    async def select(self, q: Select) -> ScalarResult:
+        async with self.session() as session:
+            results = await session.execute(q)
+            return results.scalars()
+
+    async def add(self, model) -> None:
+        async with self.session() as session:
+            session.add(model)
+            await session.commit()
+
+    async def delete(self, model) -> None:
+        async with self.session() as session:
+            session.delete(model)
