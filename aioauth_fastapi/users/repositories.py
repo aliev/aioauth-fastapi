@@ -14,7 +14,7 @@ class UserRepository:
         self.database = database
 
     async def get_user(self, username: str) -> Optional[User]:
-        q = (
+        q_results = await self.database.select(
             select(User)
             .options(
                 # for relationship loading, eager loading should be applied.
@@ -23,19 +23,13 @@ class UserRepository:
             .where(User.username == username)
         )
 
-        async with self.database.session() as session:
-            results = await session.execute(q)
-            user = results.scalars().one_or_none()
-            return user
+        return q_results.one_or_none()
 
     async def create_user(self, **kwargs) -> None:
         user = User(**kwargs)
         user.set_password(kwargs.get("password"))
 
-        async with self.database.session() as session:
-            session.add(user)
-
-            try:
-                await session.commit()
-            except IntegrityError:
-                raise DuplicateUserException
+        try:
+            await self.database.add(user)
+        except IntegrityError:
+            raise DuplicateUserException
