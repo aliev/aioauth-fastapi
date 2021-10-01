@@ -2,14 +2,14 @@ uvicorn==0.14.0
 fastapi==0.68.0
 pydantic[dotenv]==1.8.2
 aioredis==2.0.0
-PyJWT==2.1.0
 aiohttp==3.7.4.post0
 asyncpg==0.23.0
 SQLAlchemy==1.4.22
 wheel
 orjson==3.6.1
-python-jose[cryptography]==3.3.0
+python-jose[pycryptodome]==3.3.0
 dependency-injector==4.35.2
-aioauth==1.0.3
+aioauth==1.1.0
 python-multipart==0.0.5
 alembic==1.6.5
+sqlmodel==0.0.4

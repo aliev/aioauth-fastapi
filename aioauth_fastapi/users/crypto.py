@@ -4,10 +4,13 @@ import hmac
 import math
 import secrets
 import string
-from typing import Dict
-from jose import jwt, constants
 import uuid
-from datetime import timedelta, timezone, datetime
+from jose.exceptions import JWTError
+from datetime import datetime, timedelta, timezone
+from typing import Dict, Tuple
+
+from jose import constants, jwt
+
 from ..config import settings
 
 RANDOM_STRING_CHARS = string.ascii_lowercase + string.ascii_uppercase + string.digits
@@ -69,7 +72,6 @@ def make_random_password() -> str:
 def encode_jwt(
     expires_delta,
     sub,
-    token_type,
     secret,
     additional_claims: Dict = {},
     algorithm=constants.ALGORITHMS.RS256,
@@ -80,7 +82,6 @@ def encode_jwt(
         "iat": now,
         "jti": str(uuid.uuid4()),
         "nbf": now,
-        "type": token_type,
         "sub": sub,
         "exp": now + timedelta(seconds=expires_delta),
         **additional_claims,
@@ -110,11 +111,12 @@ def get_jwt(user):
         sub=str(user.id),
         secret=settings.JWT_PRIVATE_KEY,
         expires_delta=settings.ACCESS_TOKEN_EXP,
-        token_type="access",
         additional_claims={
+            "token_type": "access",
             "is_blocked": user.is_blocked,
             "is_superuser": user.is_superuser,
             "username": user.username,
+            "is_active": user.is_active,
         },
     )
 
@@ -122,12 +124,28 @@ def get_jwt(user):
         sub=str(user.id),
         secret=settings.JWT_PRIVATE_KEY,
         expires_delta=settings.REFRESH_TOKEN_EXP,
-        token_type="access",
         additional_claims={
+            "token_type": "refresh",
             "is_blocked": user.is_blocked,
             "is_superuser": user.is_superuser,
             "username": user.username,
+            "is_active": user.is_active,
         },
     )
 
     return access_token, refresh_token
+
+
+def authenticate(
+    *,
+    token: str,
+    key: str,
+) -> Tuple[bool, Dict]:
+    """Authenticate user by token"""
+    try:
+        token_header = jwt.get_unverified_header(token)
+        decoded_token = jwt.decode(token, key, algorithms=token_header.get("alg"))
+    except JWTError:
+        return False, {}
+    else:
+        return True, decoded_token
