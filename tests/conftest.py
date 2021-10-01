@@ -95,7 +95,7 @@ async def client(db: "Database", user: "User") -> Client:
 
     redirect_uris = ["https://localhost"]
 
-    scope = "read write"
+    scope = "read write openid email profile"
 
     client = Client(
         client_id=str(client_id),

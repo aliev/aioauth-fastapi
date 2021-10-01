@@ -72,7 +72,6 @@ def make_random_password() -> str:
 def encode_jwt(
     expires_delta,
     sub,
-    token_type,
     secret,
     additional_claims: Dict = {},
     algorithm=constants.ALGORITHMS.RS256,
@@ -83,7 +82,6 @@ def encode_jwt(
         "iat": now,
         "jti": str(uuid.uuid4()),
         "nbf": now,
-        "type": token_type,
         "sub": sub,
         "exp": now + timedelta(seconds=expires_delta),
         **additional_claims,
@@ -113,8 +111,8 @@ def get_jwt(user):
         sub=str(user.id),
         secret=settings.JWT_PRIVATE_KEY,
         expires_delta=settings.ACCESS_TOKEN_EXP,
-        token_type="access",
         additional_claims={
+            "token_type": "access",
             "is_blocked": user.is_blocked,
             "is_superuser": user.is_superuser,
             "username": user.username,
@@ -126,8 +124,8 @@ def get_jwt(user):
         sub=str(user.id),
         secret=settings.JWT_PRIVATE_KEY,
         expires_delta=settings.REFRESH_TOKEN_EXP,
-        token_type="refresh",
         additional_claims={
+            "token_type": "refresh",
             "is_blocked": user.is_blocked,
             "is_superuser": user.is_superuser,
             "username": user.username,

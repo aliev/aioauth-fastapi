@@ -4,13 +4,15 @@ from aioauth.models import AuthorizationCode, Client, Token
 from aioauth.requests import Request
 from aioauth.storage import BaseStorage
 from aioauth.types import GrantType, ResponseType, TokenType
+from aioauth.utils import enforce_list
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from aioauth_fastapi.storage.db import Database
-from aioauth_fastapi.users.crypto import get_jwt
+from aioauth_fastapi.users.crypto import encode_jwt, get_jwt
 
 from ..users.models import User
+from ..config import settings
 from .models import AuthorizationCode as AuthorizationCodeDB
 from .models import Client as ClientDB
 from .models import Token as TokenDB
@@ -228,3 +230,25 @@ class OAuth2Repository(BaseStorage):
         authorization_code = q_results.one_or_none()
 
         await self.database.delete(authorization_code)
+
+    async def get_id_token(
+        self,
+        request: Request,
+        client_id: str,
+        scope: str,
+        response_type: str,
+        redirect_uri: str,
+        nonce: str,
+    ) -> str:
+        scopes = enforce_list(scope)
+        user_data = {}
+
+        if "email" in scopes:
+            user_data["username"] = request.user.username
+
+        return encode_jwt(
+            expires_delta=settings.ACCESS_TOKEN_EXP,
+            sub=str(request.user.id),
+            secret=settings.JWT_PRIVATE_KEY,
+            additional_claims=user_data,
+        )
