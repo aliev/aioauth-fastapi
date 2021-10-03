@@ -9,7 +9,7 @@ wheel
 orjson==3.6.1
 python-jose[pycryptodome]==3.3.0
 dependency-injector==4.35.2
-aioauth==1.1.0
+aioauth==1.2.0
 python-multipart==0.0.5
 alembic==1.6.5
 sqlmodel==0.0.4

@@ -7,6 +7,7 @@ from aioauth.types import GrantType, ResponseType, TokenType
 from aioauth.utils import enforce_list
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql.expression import delete
 
 from aioauth_fastapi.storage.db import Database
 from aioauth_fastapi.users.crypto import encode_jwt, get_jwt
@@ -222,14 +223,9 @@ class OAuth2Repository(BaseStorage):
     async def delete_authorization_code(
         self, request: Request, client_id: str, code: str
     ) -> None:
-        q_results = await self.database.select(
-            select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
+        await self.database.delete(
+            delete(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
         )
-
-        authorization_code: Optional[AuthorizationCodeDB]
-        authorization_code = q_results.one_or_none()
-
-        await self.database.delete(authorization_code)
 
     async def get_id_token(
         self,

@@ -1,8 +1,8 @@
+from typing import Optional
 from pydantic.types import UUID4
-from sqlalchemy.sql.expression import select
+from sqlalchemy.sql.expression import delete, select
 from aioauth_fastapi.oauth2.models import Client
 from aioauth_fastapi.storage.db import Database
-from aioauth_fastapi.storage.exceptions import ObjectDoesNotExist
 
 
 class Oauth2AdminRepository:
@@ -13,13 +13,13 @@ class Oauth2AdminRepository:
         await self.database.add(client)
 
     async def client_delete(self, id: UUID4, user_id: UUID4) -> None:
+        await self.database.delete(
+            delete(Client).where(Client.id == id).where(Client.user_id == user_id)
+        )
+
+    async def client_details(self, id: UUID4, user_id: UUID4) -> Optional[Client]:
         q_results = await self.database.select(
             select(Client).where(Client.id == id).where(Client.user_id == user_id)
         )
 
-        client = q_results.one_or_none()
-
-        if not client:
-            raise ObjectDoesNotExist
-
-        await self.database.delete(client)
+        return q_results.one_or_none()
