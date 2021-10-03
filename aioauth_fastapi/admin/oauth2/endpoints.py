@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Optional
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Request
-from fastapi.params import Depends, Query
+from fastapi.params import Depends
 from pydantic import UUID4
 
 from aioauth_fastapi.admin.oauth2.services import Oauth2AdminService
@@ -43,9 +43,7 @@ async def client_list(
     service: Oauth2AdminService = Depends(
         Provide[ApplicationContainer.admin_package.oauth2_admin_service]
     ),
-    page: int = Query(1),
-    page_size: int = Query(10),
-) -> List[Client]:
+) -> Optional[List[Client]]:
     return await service.client_list(request=request)
 
 

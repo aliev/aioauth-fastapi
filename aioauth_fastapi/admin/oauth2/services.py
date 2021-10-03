@@ -4,7 +4,7 @@ from pydantic.types import UUID4
 from aioauth_fastapi.oauth2.models import Client
 from aioauth_fastapi.storage.exceptions import ObjectDoesNotExist
 from .models import ClientCreate
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 
 if TYPE_CHECKING:
@@ -28,10 +28,18 @@ class Oauth2ClientService(BaseService):
 
         return client
 
-    async def client_list(self, *, request: Request) -> List[Client]:
-        ...
+    async def client_list(self, *, request: Request) -> Optional[List[Client]]:
+
+        if not request.user.is_authenticated:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+        return await self.repository.client_list(request.user.id)
 
     async def client_details(self, *, request: Request, id: UUID4) -> Client:
+
+        if not request.user.is_authenticated:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
         client = await self.repository.client_details(id, request.user.id)
 
         if not client:
