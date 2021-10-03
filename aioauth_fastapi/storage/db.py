@@ -41,3 +41,4 @@ class Database:
     async def delete(self, model) -> None:
         async with self.session() as session:
             session.delete(model)
+            await session.commit()

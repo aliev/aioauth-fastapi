@@ -1,13 +1,17 @@
 from aioauth_fastapi.users.crypto import authenticate
 from starlette.authentication import AuthCredentials, AuthenticationBackend
+from fastapi.security.utils import get_authorization_scheme_param
 
 from ..config import settings
 from .models import User, UserAnonymous
 
 
-class CookiesAuthenticationBackend(AuthenticationBackend):
+class TokenAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request):
-        token: str = request.cookies.get("token")
+        authorization: str = request.headers.get("Authorization")
+        _, bearer_token = get_authorization_scheme_param(authorization)
+
+        token: str = request.cookies.get("access_token") or bearer_token
 
         if not token:
             return AuthCredentials(), UserAnonymous()

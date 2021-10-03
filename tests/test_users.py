@@ -27,4 +27,4 @@ async def test_registration(http_client: "AsyncClient", app: "FastAPI"):
     assert response.status_code == HTTPStatus.OK
     assert "access_token" in response.json()
     assert "refresh_token" in response.json()
-    assert response.cookies.get("token")
+    assert response.cookies.get("access_token")

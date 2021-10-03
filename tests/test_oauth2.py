@@ -20,7 +20,7 @@ async def test_authorization_code_flow(
     access_token, _ = get_jwt(user)
 
     cookies = httpx.Cookies()
-    cookies.set("token", access_token)
+    cookies.set("access_token", access_token)
 
     params = httpx.QueryParams()
     params = params.set(
@@ -94,7 +94,7 @@ async def test_implicit_flow(
     access_token, _ = get_jwt(user)
 
     cookies = httpx.Cookies()
-    cookies.set("token", access_token)
+    cookies.set("access_token", access_token)
 
     params = httpx.QueryParams()
     params = params.set("response_type", ResponseType.TYPE_TOKEN.value)

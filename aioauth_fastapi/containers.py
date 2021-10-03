@@ -4,6 +4,7 @@ from .config import settings
 from .oauth2.containers import OAuth2Container
 from .storage.db import Database
 from .users.containers import UserContainer
+from .admin.containers import AdminContainer
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
@@ -13,5 +14,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
         UserContainer,
         database=database,
     )
+
+    admin_package = providers.Container(AdminContainer, database=database)
 
     oauth2_package = providers.Container(OAuth2Container, database=database)

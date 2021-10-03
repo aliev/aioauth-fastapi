@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "AIOAuth FastAPI example"
     PROJECT_HOST: str = "0.0.0.0"
     PROJECT_PORT: int = 8001
-    DEBUG: bool = False
+    DEBUG: bool = True
 
     PSQL_DSN: str
 
