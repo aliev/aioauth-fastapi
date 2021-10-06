@@ -5,6 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.result import ScalarResult
 from sqlalchemy.sql.selectable import Select
+from sqlalchemy.sql.expression import Delete, Update
 from sqlalchemy.pool import NullPool
 
 
@@ -38,6 +39,12 @@ class Database:
             session.add(model)
             await session.commit()
 
-    async def delete(self, model) -> None:
+    async def delete(self, q: Delete) -> None:
         async with self.session() as session:
-            session.delete(model)
+            await session.execute(q)
+            await session.commit()
+
+    async def update(self, q: Update):
+        async with self.session() as session:
+            await session.execute(q)
+            await session.commit()

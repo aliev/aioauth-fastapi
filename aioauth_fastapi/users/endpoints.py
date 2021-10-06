@@ -5,7 +5,7 @@ from fastapi.params import Depends
 from aioauth_fastapi.users.services import UserService
 
 from ..containers import ApplicationContainer
-from .requests import UserLoginRequest, UserRegistrationRequest
+from .requests import UserLogin, UserRegistration
 
 router = APIRouter()
 
@@ -13,7 +13,7 @@ router = APIRouter()
 @router.post("/registration", name="users:registration")
 @inject
 async def user_registration(
-    body: UserRegistrationRequest,
+    body: UserRegistration,
     user_service: UserService = Depends(
         Provide[ApplicationContainer.user_package.user_service]
     ),
@@ -25,7 +25,7 @@ async def user_registration(
 @inject
 async def user_login(
     response: Response,
-    body: UserLoginRequest,
+    body: UserLogin,
     user_service: UserService = Depends(
         Provide[ApplicationContainer.user_package.user_service]
     ),

@@ -3,7 +3,6 @@ from aioauth.fastapi.router import get_oauth2_router
 from aioauth.server import AuthorizationServer
 from dependency_injector.wiring import Provide, inject
 from fastapi.params import Depends
-
 from ..config import settings
 from ..containers import ApplicationContainer
 
