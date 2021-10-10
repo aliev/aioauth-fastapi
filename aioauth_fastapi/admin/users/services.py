@@ -1,6 +1,6 @@
 from fastapi import Request, HTTPException, status
 from pydantic.types import UUID4
-from .models import UserCreate
+from .models import UserCreate, UserUpdate
 from aioauth_fastapi.users.models import User
 from aioauth_fastapi.storage.exceptions import ObjectExist, ObjectDoesNotExist
 from typing import TYPE_CHECKING, List
@@ -45,7 +45,20 @@ class UserAdminService:
         return await self.repository.users_list()
 
     async def user_delete(self, *, request: Request, id: UUID4) -> None:
-        ...
+        await self.repository.user_delete(id)
 
-    async def user_update(self, *, request: Request, id: UUID4) -> User:
-        ...
+    async def user_update(
+        self, *, request: Request, body: UserUpdate, id: UUID4
+    ) -> User:
+        user = User(**body.dict(exclude_unset=True, exclude={"password"}))
+
+        if body.password is not None:
+            user.set_password(body.password)
+
+        try:
+            return await self.repository.user_update(id, user)
+        except ObjectExist:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="User with this username already exists",
+            )

@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy.sql.expression import select
+from sqlalchemy.sql.expression import delete, select, update
 from aioauth_fastapi.storage.db import Database
 from aioauth_fastapi.users.models import User
 from pydantic import UUID4
@@ -34,3 +34,18 @@ class UserAdminRepository:
         q_results = await self.database.select(select(User))
 
         return q_results.fetchall()
+
+    async def user_delete(self, id: UUID4) -> None:
+        await self.database.delete(delete(User).where(User.id == id))
+
+    async def user_update(self, id: UUID4, user: User) -> User:
+        try:
+            await self.database.update(
+                update(User)
+                .where(User.id == id)
+                .values(**user.dict(exclude={"id": True}))
+            )
+        except IntegrityError:
+            raise ObjectExist
+
+        return user

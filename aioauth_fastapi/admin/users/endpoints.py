@@ -7,7 +7,7 @@ from pydantic.types import UUID4
 from aioauth_fastapi.admin.users.services import UserAdminService
 from aioauth_fastapi.containers import ApplicationContainer
 from aioauth_fastapi.users.models import User
-from .models import UserCreate
+from .models import UserCreate, UserUpdate
 
 routers = APIRouter()
 
@@ -64,8 +64,9 @@ async def user_delete(
 async def user_update(
     request: Request,
     id: UUID4,
+    body: UserUpdate,
     service: UserAdminService = Depends(
         Provide[ApplicationContainer.admin_package.user_admin_service]
     ),
 ) -> User:
-    return await service.user_update(request=request, id=id)
+    return await service.user_update(request=request, body=body, id=id)
