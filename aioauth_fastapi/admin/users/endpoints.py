@@ -37,9 +37,9 @@ async def user_details(
 
 
 @routers.get("/", response_model=List[User])
+@inject
 async def users_list(
     request: Request,
-    id: UUID4,
     service: UserAdminService = Depends(
         Provide[ApplicationContainer.admin_package.user_admin_service]
     ),
@@ -48,6 +48,7 @@ async def users_list(
 
 
 @routers.get("/{id}/")
+@inject
 async def user_delete(
     request: Request,
     id: UUID4,
@@ -59,6 +60,7 @@ async def user_delete(
 
 
 @routers.patch("/{id}/", response_model=User)
+@inject
 async def user_update(
     request: Request,
     id: UUID4,
