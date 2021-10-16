@@ -1,6 +1,8 @@
 from typing import List, Optional
 from pydantic.types import UUID4
-from sqlalchemy.sql.expression import delete, select
+from sqlalchemy.exc import IntegrityError
+from aioauth_fastapi.storage.exceptions import ObjectDoesNotExist, ObjectExist
+from sqlalchemy.sql.expression import delete, select, update
 from aioauth_fastapi.oauth2.models import Client
 from aioauth_fastapi.storage.db import Database
 
@@ -24,9 +26,27 @@ class Oauth2AdminRepository:
             delete(Client).where(Client.id == id).where(Client.user_id == user_id)
         )
 
-    async def client_details(self, id: UUID4, user_id: UUID4) -> Optional[Client]:
+    async def client_details(self, id: UUID4, user_id: UUID4) -> Client:
         q_results = await self.database.select(
             select(Client).where(Client.id == id).where(Client.user_id == user_id)
         )
 
-        return q_results.one_or_none()
+        client = q_results.one_or_none()
+
+        if not client:
+            raise ObjectDoesNotExist
+
+        return client
+
+    async def client_update(self, id: UUID4, client: Client, user_id: UUID4) -> Client:
+        try:
+            await self.database.update(
+                update(Client)
+                .where(Client.id == id)
+                .where(Client.user_id == user_id)
+                .values(**client.dict(exclude={"id": True}))
+            )
+        except IntegrityError:
+            raise ObjectExist
+
+        return client
