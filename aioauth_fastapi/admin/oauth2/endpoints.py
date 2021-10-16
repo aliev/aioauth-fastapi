@@ -5,7 +5,7 @@ from fastapi.params import Depends
 from pydantic import UUID4
 
 from aioauth_fastapi.admin.oauth2.services import Oauth2AdminService
-from .models import ClientCreate
+from .models import ClientCreate, ClientUpdate
 from ...containers import ApplicationContainer
 from ...oauth2.models import Client
 
@@ -57,3 +57,16 @@ async def client_delete(
     ),
 ):
     return await service.client_delete(request=request, id=id)
+
+
+@routers.patch("/{id}/", response_model=Client)
+@inject
+async def client_update(
+    request: Request,
+    body: ClientUpdate,
+    id: UUID4,
+    service: Oauth2AdminService = Depends(
+        Provide[ApplicationContainer.admin_package.oauth2_admin_service]
+    ),
+) -> Client:
+    return await service.client_update(request=request, body=body, id=id)
