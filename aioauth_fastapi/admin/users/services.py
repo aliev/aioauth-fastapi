@@ -2,8 +2,7 @@ from fastapi import Request, HTTPException, status
 from pydantic.types import UUID4
 from .models import UserCreate, UserUpdate
 from aioauth_fastapi.users.models import User
-from aioauth_fastapi.storage.exceptions import ObjectExist, ObjectDoesNotExist
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 
 if TYPE_CHECKING:
@@ -15,6 +14,14 @@ class UserAdminService:
         self.repository = users_admin_repository
 
     async def user_create(self, *, request: Request, body: UserCreate) -> User:
+        user_exists = await self.repository.get_user_by_username(body.username)
+
+        if user_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this username already exists",
+            )
+
         user = User(
             is_superuser=body.is_superuser,
             is_blocked=body.is_blocked,
@@ -24,19 +31,13 @@ class UserAdminService:
 
         user.set_password(body.password)
 
-        try:
-            return await self.repository.user_create(user)
-        except ObjectExist:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="User already exists",
-            )
+        return await self.repository.user_create(user)
 
-    async def user_details(self, *, request: Request, id: UUID4) -> User:
+    async def user_details(self, *, request: Request, id: UUID4) -> Optional[User]:
 
-        try:
-            return await self.repository.user_details(id)
-        except ObjectDoesNotExist:
+        user = await self.repository.user_details(id)
+
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
@@ -50,15 +51,19 @@ class UserAdminService:
     async def user_update(
         self, *, request: Request, body: UserUpdate, id: UUID4
     ) -> User:
-        user = User(**body.dict(exclude_unset=True, exclude={"password"}))
+
+        if body.username:
+            user_exists = await self.repository.get_user_by_username(body.username)
+
+            if user_exists:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User with this username already exists",
+                )
+
+        user = User(id=id, **body.dict(exclude_unset=True, exclude={"password"}))
 
         if body.password is not None:
             user.set_password(body.password)
 
-        try:
-            return await self.repository.user_update(id, user)
-        except ObjectExist:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="User with this username already exists",
-            )
+        return await self.repository.user_update(id, user)

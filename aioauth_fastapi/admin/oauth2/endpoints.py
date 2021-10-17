@@ -5,6 +5,7 @@ from fastapi.params import Depends
 from pydantic import UUID4
 
 from aioauth_fastapi.admin.oauth2.services import Oauth2AdminService
+from aioauth_fastapi.users.utils import is_superuser
 from .models import ClientCreate, ClientUpdate
 from ...containers import ApplicationContainer
 from ...oauth2.models import Client
@@ -14,6 +15,7 @@ routers = APIRouter()
 
 @routers.post("/", response_model=Client)
 @inject
+@is_superuser
 async def client_create(
     request: Request,
     body: ClientCreate,
@@ -26,6 +28,7 @@ async def client_create(
 
 @routers.get("/{id}/", response_model=Client)
 @inject
+@is_superuser
 async def client_details(
     request: Request,
     id: UUID4,
@@ -38,6 +41,7 @@ async def client_details(
 
 @routers.get("/", response_model=List[Client])
 @inject
+@is_superuser
 async def client_list(
     request: Request,
     service: Oauth2AdminService = Depends(
@@ -49,6 +53,7 @@ async def client_list(
 
 @routers.delete("/{id}/")
 @inject
+@is_superuser
 async def client_delete(
     request: Request,
     id: UUID4,
@@ -61,6 +66,7 @@ async def client_delete(
 
 @routers.patch("/{id}/", response_model=Client)
 @inject
+@is_superuser
 async def client_update(
     request: Request,
     body: ClientUpdate,

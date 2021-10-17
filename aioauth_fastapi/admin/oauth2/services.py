@@ -18,10 +18,6 @@ class BaseService:
 
 class Oauth2ClientService(BaseService):
     async def client_create(self, *, request: Request, body: ClientCreate) -> Client:
-
-        if not request.user.is_authenticated:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
         client = Client(**body.dict(), user_id=request.user.id)
 
         await self.repository.create_client(client)
@@ -30,15 +26,9 @@ class Oauth2ClientService(BaseService):
 
     async def client_list(self, *, request: Request) -> Optional[List[Client]]:
 
-        if not request.user.is_authenticated:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
         return await self.repository.client_list(request.user.id)
 
     async def client_details(self, *, request: Request, id: UUID4) -> Client:
-
-        if not request.user.is_authenticated:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
         try:
             return await self.repository.client_details(id, request.user.id)
@@ -46,9 +36,6 @@ class Oauth2ClientService(BaseService):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
     async def client_delete(self, *, request: Request, id: UUID4) -> None:
-        if not request.user.is_authenticated:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
         try:
             await self.repository.client_delete(id, user_id=request.user.id)
         except ObjectDoesNotExist:
@@ -57,10 +44,7 @@ class Oauth2ClientService(BaseService):
     async def client_update(
         self, *, request: Request, body: ClientUpdate, id: UUID4
     ) -> Client:
-        if not request.user.is_authenticated:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
-        client = Client(**body.dict(exclude_unset=True))
+        client = Client(**body.dict(exclude_unset=True), user_id=request.user.id)
 
         try:
             return await self.repository.client_update(
