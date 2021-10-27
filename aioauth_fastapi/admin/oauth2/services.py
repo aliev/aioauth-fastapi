@@ -30,10 +30,12 @@ class Oauth2ClientService(BaseService):
 
     async def client_details(self, *, request: Request, id: UUID4) -> Client:
 
-        try:
-            return await self.repository.client_details(id, request.user.id)
-        except ObjectDoesNotExist:
+        client = await self.repository.client_details(id, request.user.id)
+
+        if not client:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+        return client
 
     async def client_delete(self, *, request: Request, id: UUID4) -> None:
         try:
