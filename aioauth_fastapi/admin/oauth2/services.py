@@ -2,7 +2,6 @@ from fastapi import Request, HTTPException, status
 from pydantic.types import UUID4
 
 from aioauth_fastapi.oauth2.models import Client
-from aioauth_fastapi.storage.exceptions import ObjectDoesNotExist, ObjectExist
 from .models import ClientCreate, ClientUpdate
 from typing import TYPE_CHECKING, List, Optional
 
@@ -38,25 +37,13 @@ class Oauth2ClientService(BaseService):
         return client
 
     async def client_delete(self, *, request: Request, id: UUID4) -> None:
-        try:
-            await self.repository.client_delete(id, user_id=request.user.id)
-        except ObjectDoesNotExist:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        await self.repository.client_delete(id, user_id=request.user.id)
 
     async def client_update(
         self, *, request: Request, body: ClientUpdate, id: UUID4
     ) -> Client:
         client = Client(**body.dict(exclude_unset=True), user_id=request.user.id)
-
-        try:
-            return await self.repository.client_update(
-                id, client, user_id=request.user.id
-            )
-        except ObjectExist:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Client already exists",
-            )
+        return await self.repository.client_update(id, client, user_id=request.user.id)
 
 
 class Oauth2AdminService(Oauth2ClientService):

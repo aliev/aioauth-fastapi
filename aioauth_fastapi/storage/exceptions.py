@@ -1,6 +1,0 @@
-class ObjectDoesNotExist(Exception):
-    ...
-
-
-class ObjectExist(Exception):
-    ...
