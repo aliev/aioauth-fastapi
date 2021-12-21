@@ -12,14 +12,14 @@ from aioauth_fastapi.users.crypto import get_jwt
 if TYPE_CHECKING:  # pragma: no cover
     from httpx import AsyncClient
     from aioauth_fastapi.users.models import User
-    from aioauth_fastapi.storage.db import Database
+    from aioauth_fastapi.storage.db import PostgreSQL
 
 
 @pytest.mark.asyncio
 async def test_create_oauth2_client(
     http_client: "AsyncClient",
     user: "User",
-    db: "Database",
+    db: "PostgreSQL",
 ):
     access_token, _ = get_jwt(user)
     cookies = httpx.Cookies()
@@ -38,7 +38,7 @@ async def test_create_oauth2_client(
     }
 
     response = await http_client.post(
-        "/api/admin/oauth2/",
+        "/api/admin/",
         cookies=cookies,
         allow_redirects=False,
         json=body,

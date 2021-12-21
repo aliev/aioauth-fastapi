@@ -15,11 +15,6 @@ async def test_registration(http_client: "AsyncClient", app: "FastAPI"):
     response = await http_client.post(url, json={"username": "asd", "password": "asd"})
     assert response.status_code == HTTPStatus.NO_CONTENT
 
-    # User already exists
-    url = app.url_path_for("users:registration")
-    response = await http_client.post(url, json={"username": "asd", "password": "asd"})
-    assert response.status_code == HTTPStatus.BAD_REQUEST
-
     # Login
     url = app.url_path_for("users:login")
     response = await http_client.post(url, json={"username": "asd", "password": "asd"})

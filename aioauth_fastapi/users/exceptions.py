@@ -1,2 +1,0 @@
-class DuplicateUserException(Exception):
-    pass

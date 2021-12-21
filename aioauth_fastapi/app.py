@@ -8,8 +8,7 @@ from .config import settings
 from .containers import ApplicationContainer
 from .oauth2 import endpoints as oauth2_endpoints
 from .users import endpoints as users_endpoints
-from .admin.users import endpoints as admin_users_endpoints
-from .admin.oauth2 import endpoints as oauth2_admin_endpoints
+from .admin import endpoints as admin_endpoints
 from .users.backends import TokenAuthenticationBackend
 
 api_key_header = APIKeyHeader(name="authorization", auto_error=False)
@@ -27,22 +26,15 @@ app.container.wire(
     modules=[
         oauth2_endpoints,
         users_endpoints,
-        admin_users_endpoints,
-        oauth2_admin_endpoints,
+        admin_endpoints,
     ]
 )
 
 # Include API router
 app.include_router(users_endpoints.router, prefix="/api/users", tags=["users"])
 app.include_router(
-    admin_users_endpoints.routers,
-    prefix="/api/admin/users",
-    tags=["admin"],
-    dependencies=[Security(api_key_header)],
-)
-app.include_router(
-    oauth2_admin_endpoints.routers,
-    prefix="/api/admin/oauth2",
+    admin_endpoints.routers,
+    prefix="/api/admin",
     tags=["admin"],
     dependencies=[Security(api_key_header)],
 )

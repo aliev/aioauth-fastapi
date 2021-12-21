@@ -9,7 +9,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.expression import delete
 
-from aioauth_fastapi.storage.db import Database
+from aioauth_fastapi.storage.db import PostgreSQL
 from aioauth_fastapi.users.crypto import encode_jwt, get_jwt
 
 from ..users.models import User
@@ -19,8 +19,8 @@ from .models import Client as ClientDB
 from .models import Token as TokenDB
 
 
-class OAuth2Repository(BaseStorage):
-    def __init__(self, database: Database):
+class Storage(BaseStorage):
+    def __init__(self, database: PostgreSQL):
         self.database = database
 
     async def get_user(self, request: Request):

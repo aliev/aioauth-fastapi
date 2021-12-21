@@ -4,7 +4,7 @@ import logging
 from uuid import uuid4
 from aioauth_fastapi.config import Settings
 from aioauth_fastapi.users.models import User
-from aioauth_fastapi.storage.db import Database
+from aioauth_fastapi.storage.db import PostgreSQL
 from typing import TYPE_CHECKING
 from httpx import AsyncClient
 import pytest
@@ -48,8 +48,8 @@ def app() -> "FastAPI":
 
 
 @pytest.fixture
-def db(settings: Settings) -> Database:
-    return Database(settings.PSQL_DSN)
+def db(settings: Settings) -> PostgreSQL:
+    return PostgreSQL(settings.PSQL_DSN)
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ def user_password():
 
 
 @pytest.fixture
-async def user(db: "Database", user_password: str) -> User:
+async def user(db: "PostgreSQL", user_password: str) -> User:
     user = User(is_superuser=True, is_active=True, username="admin@admin.com")
     user.set_password(user_password)
 
@@ -77,7 +77,7 @@ async def user(db: "Database", user_password: str) -> User:
 
 
 @pytest.fixture
-async def client(db: "Database", user: "User") -> Client:
+async def client(db: "PostgreSQL", user: "User") -> Client:
     client_id = uuid4()
     client_secret = uuid4()
     grant_types = [

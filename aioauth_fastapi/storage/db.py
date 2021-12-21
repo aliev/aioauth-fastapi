@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import Delete, Update
 from sqlalchemy.pool import NullPool
 
 
-class Database:
+class PostgreSQL:
     def __init__(self, dsn: str) -> None:
         # NOTE: https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#using-multiple-asyncio-event-loops
         self.engine = create_async_engine(dsn, echo=True, poolclass=NullPool)
