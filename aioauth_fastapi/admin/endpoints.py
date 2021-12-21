@@ -17,9 +17,7 @@ routers = APIRouter()
 async def client_create(
     request: Request,
     body: ClientCreate,
-    storage: Storage = Depends(
-        Provide[ApplicationContainer.admin_package.storage]
-    ),
+    storage: Storage = Depends(Provide[ApplicationContainer.admin_package.storage]),
 ) -> Client:
     client = Client(**body.dict(), user_id=request.user.id)
     await storage.create_client(client)
@@ -31,9 +29,7 @@ async def client_create(
 async def client_details(
     request: Request,
     id: UUID4,
-    storage: Storage = Depends(
-        Provide[ApplicationContainer.admin_package.storage]
-    ),
+    storage: Storage = Depends(Provide[ApplicationContainer.admin_package.storage]),
 ) -> Client:
     client = await storage.client_details(id, request.user.id)
 
@@ -47,9 +43,7 @@ async def client_details(
 @inject
 async def client_list(
     request: Request,
-    storage: Storage = Depends(
-        Provide[ApplicationContainer.admin_package.storage]
-    ),
+    storage: Storage = Depends(Provide[ApplicationContainer.admin_package.storage]),
 ) -> Optional[List[Client]]:
     return await storage.client_list(request.user.id)
 
@@ -59,9 +53,7 @@ async def client_list(
 async def client_delete(
     request: Request,
     id: UUID4,
-    storage: Storage = Depends(
-        Provide[ApplicationContainer.admin_package.storage]
-    ),
+    storage: Storage = Depends(Provide[ApplicationContainer.admin_package.storage]),
 ):
     await storage.client_delete(id, user_id=request.user.id)
 
@@ -72,9 +64,7 @@ async def client_update(
     request: Request,
     body: ClientUpdate,
     id: UUID4,
-    storage: Storage = Depends(
-        Provide[ApplicationContainer.admin_package.storage]
-    ),
+    storage: Storage = Depends(Provide[ApplicationContainer.admin_package.storage]),
 ) -> Client:
     client = Client(**body.dict(exclude_unset=True), user_id=request.user.id)
     return await storage.client_update(id, client, user_id=request.user.id)
