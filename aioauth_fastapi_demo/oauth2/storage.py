@@ -9,8 +9,8 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.expression import delete
 
-from aioauth_fastapi.storage.db import PostgreSQL
-from aioauth_fastapi.users.crypto import encode_jwt, get_jwt
+from aioauth_fastapi_demo.storage.db import PostgreSQL
+from aioauth_fastapi_demo.users.crypto import encode_jwt, get_jwt
 
 from ..users.models import User
 from ..config import settings

@@ -1,10 +1,10 @@
-from aioauth_fastapi.users.crypto import get_jwt
+from aioauth_fastapi_demo.users.crypto import get_jwt
 from http import HTTPStatus
 import pytest
 from urllib import parse
 from aioauth.types import GrantType, ResponseType
-from aioauth_fastapi.users.models import User
-from aioauth_fastapi.oauth2.models import Client
+from aioauth_fastapi_demo.users.models import User
+from aioauth_fastapi_demo.oauth2.models import Client
 from typing import TYPE_CHECKING
 import httpx
 

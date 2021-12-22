@@ -1,10 +1,10 @@
 from aioauth.types import GrantType, ResponseType
-from aioauth_fastapi.oauth2.models import Client
+from aioauth_fastapi_demo.oauth2.models import Client
 import logging
 from uuid import uuid4
-from aioauth_fastapi.config import Settings
-from aioauth_fastapi.users.models import User
-from aioauth_fastapi.storage.db import PostgreSQL
+from aioauth_fastapi_demo.config import Settings
+from aioauth_fastapi_demo.users.models import User
+from aioauth_fastapi_demo.storage.db import PostgreSQL
 from typing import TYPE_CHECKING
 from httpx import AsyncClient
 import pytest
@@ -20,7 +20,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @pytest.fixture(autouse=True)
 def settings():
-    from aioauth_fastapi.config import settings as _settings
+    from aioauth_fastapi_demo.config import settings as _settings
 
     return _settings
 
@@ -42,7 +42,7 @@ def migrations():
 
 @pytest.fixture
 def app() -> "FastAPI":
-    from aioauth_fastapi.app import app as _app
+    from aioauth_fastapi_demo.app import app as _app
 
     return _app
 

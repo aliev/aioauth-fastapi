@@ -6,9 +6,9 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel import SQLModel
 
-from aioauth_fastapi.config import settings
-from aioauth_fastapi.oauth2.models import *  # noqa
-from aioauth_fastapi.users.models import *  # noqa
+from aioauth_fastapi_demo.config import settings
+from aioauth_fastapi_demo.oauth2.models import *  # noqa
+from aioauth_fastapi_demo.users.models import *  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -4,7 +4,7 @@ from fastapi import Request, HTTPException, status, APIRouter
 from fastapi.params import Depends
 from pydantic import UUID4
 
-from aioauth_fastapi.admin.storage import Storage
+from aioauth_fastapi_demo.admin.storage import Storage
 from .models import ClientCreate, ClientUpdate
 from ..containers import ApplicationContainer
 from ..oauth2.models import Client

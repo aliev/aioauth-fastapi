@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from aioauth_fastapi.storage.db import PostgreSQL
+from aioauth_fastapi_demo.storage.db import PostgreSQL
 
 from .models import User
 
