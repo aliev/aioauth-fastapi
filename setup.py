@@ -14,9 +14,9 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 
-require_base = ["fastapi==0.70.1", "aioauth==1.2.0"]
-
 require_dev = [
+    "fastapi==0.70.1",
+    "aioauth==1.2.0",
     "uvicorn==0.16.0",
     "wheel",
     "twine==3.7.1",
@@ -78,7 +78,6 @@ setup(
     license=about["__license__"],
     python_requires=">=3.6.0",
     classifiers=classifiers,
-    install_requires=require_base,
     extras_require={
         "dev": require_dev,
     },
