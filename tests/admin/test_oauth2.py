@@ -2,24 +2,20 @@ import pytest
 import httpx
 import uuid
 from http import HTTPStatus
-from typing import TYPE_CHECKING
 from aioauth.types import GrantType, ResponseType
 from sqlalchemy.sql.expression import select
 from aioauth_fastapi_demo.oauth2.models import Client
 from aioauth_fastapi_demo.users.crypto import get_jwt
-
-
-if TYPE_CHECKING:  # pragma: no cover
-    from httpx import AsyncClient
-    from aioauth_fastapi_demo.users.models import User
-    from aioauth_fastapi_demo.storage.db import PostgreSQL
+from httpx import AsyncClient
+from aioauth_fastapi_demo.users.models import User
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
 
 
 @pytest.mark.asyncio
 async def test_create_oauth2_client(
-    http_client: "AsyncClient",
-    user: "User",
-    db: "PostgreSQL",
+    http_client: AsyncClient,
+    user: User,
+    db: SQLAlchemy,
 ):
     access_token, _ = get_jwt(user)
     cookies = httpx.Cookies()
@@ -40,7 +36,7 @@ async def test_create_oauth2_client(
     response = await http_client.post(
         "/api/admin/",
         cookies=cookies,
-        allow_redirects=False,
+        follow_redirects=False,
         json=body,
     )
 

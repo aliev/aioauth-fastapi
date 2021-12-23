@@ -5,35 +5,26 @@ from urllib import parse
 from aioauth.types import GrantType, ResponseType
 from aioauth_fastapi_demo.users.models import User
 from aioauth_fastapi_demo.oauth2.models import Client
-from typing import TYPE_CHECKING
-import httpx
-
-
-if TYPE_CHECKING:  # pragma: no cover
-    from httpx import AsyncClient
+from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
 async def test_authorization_code_flow(
-    http_client: "AsyncClient", user: "User", client: "Client"
+    http_client: AsyncClient, user: "User", client: "Client"
 ):
     access_token, _ = get_jwt(user)
 
-    cookies = httpx.Cookies()
-    cookies.set("access_token", access_token)
-
-    params = httpx.QueryParams()
-    params = params.set(
-        "response_type",
-        f"{ResponseType.TYPE_CODE.value} {ResponseType.TYPE_ID_TOKEN.value}",
-    )
-    params = params.set("client_id", client.client_id)
-    params = params.set("redirect_uri", client.redirect_uris[0])
-    params = params.set("scope", "openid email profile")
-    params = params.set("nonce", "73Ncd3")
-
     response = await http_client.get(
-        "/oauth2/authorize", params=params, cookies=cookies, allow_redirects=False
+        "/oauth2/authorize",
+        params={
+            "response_type": f"{ResponseType.TYPE_CODE.value} {ResponseType.TYPE_ID_TOKEN.value}",
+            "client_id": client.client_id,
+            "redirect_uri": client.redirect_uris[0],
+            "scope": "openid email profile",
+            "nonce": "73Ncd3",
+        },
+        cookies={"access_token": access_token},
+        follow_redirects=False,
     )
 
     assert response.status_code == HTTPStatus.FOUND
@@ -88,21 +79,18 @@ async def test_authorization_code_flow(
 
 
 @pytest.mark.asyncio
-async def test_implicit_flow(
-    http_client: "AsyncClient", user: "User", client: "Client"
-):
+async def test_implicit_flow(http_client: AsyncClient, user: "User", client: "Client"):
     access_token, _ = get_jwt(user)
 
-    cookies = httpx.Cookies()
-    cookies.set("access_token", access_token)
-
-    params = httpx.QueryParams()
-    params = params.set("response_type", ResponseType.TYPE_TOKEN.value)
-    params = params.set("client_id", client.client_id)
-    params = params.set("redirect_uri", client.redirect_uris[0])
-
     response = await http_client.get(
-        "/oauth2/authorize", params=params, cookies=cookies, allow_redirects=False
+        "/oauth2/authorize",
+        params={
+            "response_type": ResponseType.TYPE_TOKEN.value,
+            "client_id": client.client_id,
+            "redirect_uri": client.redirect_uris[0],
+        },
+        cookies={"access_token": access_token},
+        follow_redirects=False,
     )
 
     assert response.headers.get("location")

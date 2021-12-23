@@ -2,13 +2,13 @@ from typing import Optional
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from aioauth_fastapi_demo.storage.db import PostgreSQL
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
 
 from .models import User
 
 
 class Storage:
-    def __init__(self, database: PostgreSQL):
+    def __init__(self, database: SQLAlchemy):
         self.database = database
 
     async def get_user(self, username: str) -> Optional[User]:
