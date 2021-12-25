@@ -8,6 +8,7 @@ import uuid
 from jose.exceptions import JWTError
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Tuple
+from Crypto.PublicKey import RSA
 
 from jose import constants, jwt
 
@@ -149,3 +150,17 @@ def authenticate(
         return False, {}
     else:
         return True, decoded_token
+
+
+def generate_keys_pair(size: int = 2048) -> Tuple[bytes, bytes]:
+    """Generate RSA keys pair
+
+    Args:
+        size (int, optional): Key size. Defaults to 2048.
+
+    Returns:
+        Tuple[bytes, bytes]: Public and private keys.
+    """
+    keys = RSA.generate(size)
+
+    return keys.public_key().exportKey(), keys.exportKey()
