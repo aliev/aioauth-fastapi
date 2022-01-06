@@ -1,18 +1,17 @@
 from aioauth.config import Settings
 from aioauth.fastapi.router import get_oauth2_router
 from aioauth.server import AuthorizationServer
-from dependency_injector.wiring import Provide, inject
-from fastapi.params import Depends
+from aioauth_fastapi_demo.storage.init import get_database
+
 from ..config import settings
-from ..containers import ApplicationContainer
+from .storage import Storage
 
 
-@inject
-def get_router(
-    authorization_server: AuthorizationServer = Depends(
-        Provide[ApplicationContainer.oauth2_package.authorization_server]
-    ),
-):
+def get_router():
+    database = get_database()
+    storage = Storage(database=database)
+    authorization_server = AuthorizationServer(storage=storage)
+
     return get_oauth2_router(
         authorization_server,
         settings=Settings(

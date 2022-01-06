@@ -1,9 +1,10 @@
 from http import HTTPStatus
-from dependency_injector.wiring import Provide, inject
 from fastapi import HTTPException, Response, APIRouter
 from fastapi.params import Depends
+from aioauth_fastapi_demo.storage.init import get_database
+
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
 from .storage import Storage
-from ..containers import ApplicationContainer
 from .requests import UserLogin, UserRegistration
 from .crypto import get_jwt
 from .responses import TokenResponse
@@ -13,22 +14,22 @@ router = APIRouter()
 
 
 @router.post("/registration", name="users:registration")
-@inject
 async def user_registration(
     body: UserRegistration,
-    storage: Storage = Depends(Provide[ApplicationContainer.user_package.storage]),
+    database: SQLAlchemy = Depends(get_database)
 ):
+    storage = Storage(database=database)
     await storage.create_user(**body.dict())
     return Response(status_code=HTTPStatus.NO_CONTENT)
 
 
 @router.post("/login", name="users:login")
-@inject
 async def user_login(
     response: Response,
     body: UserLogin,
-    storage: Storage = Depends(Provide[ApplicationContainer.user_package.storage]),
+    database: SQLAlchemy = Depends(get_database)
 ):
+    storage = Storage(database=database)
     user = await storage.get_user(username=body.username)
 
     if user is None:

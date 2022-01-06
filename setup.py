@@ -25,7 +25,6 @@ require_dev = [
     "SQLAlchemy[asyncio]==1.4.28",
     "orjson==3.6.5",
     "python-jose[pycryptodome]==3.3.0",
-    "dependency-injector==4.37.0",
     "python-multipart==0.0.5",
     "alembic==1.7.5",
     "sqlmodel==0.0.5",

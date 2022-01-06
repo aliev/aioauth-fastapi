@@ -5,7 +5,6 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.security import APIKeyHeader
 
 from .config import settings
-from .containers import ApplicationContainer
 from .oauth2 import endpoints as oauth2_endpoints
 from .users import endpoints as users_endpoints
 from .admin import endpoints as admin_endpoints
@@ -18,16 +17,6 @@ app = FastAPI(
     docs_url="/api/openapi",
     openapi_url="/api/openapi.json",
     default_response_class=ORJSONResponse,
-)
-
-app.container = ApplicationContainer()
-app.container.init_resources()
-app.container.wire(
-    modules=[
-        oauth2_endpoints,
-        users_endpoints,
-        admin_endpoints,
-    ]
 )
 
 # Include API router
