@@ -44,10 +44,11 @@ async def test_create_oauth2_client(
 
     response_json = response.json()
 
-    async with db.session() as session:
-        results = await session.execute(
-            select(Client).where(Client.id == response_json["id"])
-        )
+    results = await db.session.execute(
+        select(Client).where(Client.id == response_json["id"])
+    )
+
+    await db.session.close()
 
     client = results.scalar()
 
