@@ -28,7 +28,7 @@ require_dev = [
     "python-multipart==0.0.5",
     "alembic==1.7.5",
     "sqlmodel==0.0.5",
-    "httpx==0.21.1",
+    "async-asgi-testclient==1.4.9",
     "pre-commit==2.16.0",
     "pytest==6.2.5",
     "pytest-asyncio==0.16.0",
