@@ -1,13 +1,13 @@
 from http import HTTPStatus
-from fastapi import HTTPException, Response, APIRouter
+
+from fastapi import APIRouter, HTTPException, Response
 from fastapi.params import Depends
 
-from ..storage.sqlalchemy import get_sqlalchemy_storage
-from ..storage.sqlalchemy import SQLAlchemyStorage
-from .storage import Storage
-from .requests import UserLogin, UserRegistration
+from ..storage.sqlalchemy import SQLAlchemyStorage, get_sqlalchemy_storage
 from .crypto import get_jwt
+from .requests import UserLogin, UserRegistration
 from .responses import TokenResponse
+from .storage import Storage
 
 router = APIRouter()
 

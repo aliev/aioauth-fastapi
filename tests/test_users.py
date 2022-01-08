@@ -1,6 +1,8 @@
 from http import HTTPStatus
+
 import pytest
 from async_asgi_testclient import TestClient
+
 from aioauth_fastapi_demo.app import app
 
 

@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from aioauth.types import GrantType, ResponseType
 from pydantic import BaseModel
 

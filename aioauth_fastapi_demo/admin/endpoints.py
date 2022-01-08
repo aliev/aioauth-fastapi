@@ -1,12 +1,13 @@
 from typing import List, Optional
-from fastapi import Request, HTTPException, status, APIRouter
+
+from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.params import Depends
 from pydantic import UUID4
 
-from .storage import Storage
-from ..storage.sqlalchemy import get_sqlalchemy_storage, SQLAlchemyStorage
-from .models import ClientCreate, ClientUpdate
 from ..oauth2.models import Client
+from ..storage.sqlalchemy import SQLAlchemyStorage, get_sqlalchemy_storage
+from .models import ClientCreate, ClientUpdate
+from .storage import Storage
 
 routers = APIRouter()
 

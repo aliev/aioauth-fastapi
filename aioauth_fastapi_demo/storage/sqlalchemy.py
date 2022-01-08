@@ -1,7 +1,8 @@
 from typing import Optional
+
 from sqlalchemy.engine.result import Result
-from sqlalchemy.sql.selectable import Select
 from sqlalchemy.sql.expression import Delete, Update
+from sqlalchemy.sql.selectable import Select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 

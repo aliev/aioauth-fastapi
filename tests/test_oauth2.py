@@ -1,11 +1,13 @@
-from aioauth_fastapi_demo.users.crypto import get_jwt
 from http import HTTPStatus
-import pytest
 from urllib import parse
+
+import pytest
 from aioauth.types import GrantType, ResponseType
-from aioauth_fastapi_demo.users.models import User
-from aioauth_fastapi_demo.oauth2.models import Client
 from async_asgi_testclient import TestClient
+
+from aioauth_fastapi_demo.oauth2.models import Client
+from aioauth_fastapi_demo.users.crypto import get_jwt
+from aioauth_fastapi_demo.users.models import User
 
 
 @pytest.mark.asyncio

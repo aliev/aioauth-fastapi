@@ -10,14 +10,13 @@ Core utils for integration with FastAPI
 
 import json
 
-from fastapi import Request, Response
-
 from aioauth.collections import HTTPHeaderDict
 from aioauth.config import Settings
 from aioauth.requests import Post, Query
 from aioauth.requests import Request as OAuth2Request
 from aioauth.responses import Response as OAuth2Response
 from aioauth.types import RequestMethod
+from fastapi import Request, Response
 
 
 async def to_oauth2_request(

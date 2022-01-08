@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from .storage import sqlalchemy
 from .config import settings
+from .storage import sqlalchemy
 
 
 async def create_sqlalchemy_connection():

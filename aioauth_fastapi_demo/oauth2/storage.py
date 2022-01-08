@@ -9,11 +9,10 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.expression import delete
 
+from ..config import settings
 from ..storage.sqlalchemy import SQLAlchemyStorage
 from ..users.crypto import encode_jwt, get_jwt
-
 from ..users.models import User
-from ..config import settings
 from .models import AuthorizationCode as AuthorizationCodeDB
 from .models import Client as ClientDB
 from .models import Token as TokenDB

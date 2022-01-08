@@ -1,6 +1,7 @@
-from aioauth_fastapi_demo.users.crypto import authenticate
-from starlette.authentication import AuthCredentials, AuthenticationBackend
 from fastapi.security.utils import get_authorization_scheme_param
+from starlette.authentication import AuthCredentials, AuthenticationBackend
+
+from aioauth_fastapi_demo.users.crypto import authenticate
 
 from ..config import settings
 from .models import User, UserAnonymous

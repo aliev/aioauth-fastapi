@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from pydantic.types import UUID4
 from sqlalchemy.sql.expression import delete, select, update
 

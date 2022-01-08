@@ -1,14 +1,16 @@
-from aioauth.types import GrantType, ResponseType
-from aioauth_fastapi_demo.oauth2.models import Client
 import logging
 from uuid import uuid4
-from aioauth_fastapi_demo.users.models import User
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
+
 import pytest
+from aioauth.types import GrantType, ResponseType
 from alembic.config import main
-from Crypto.PublicKey import RSA
-from aioauth_fastapi_demo.app import app
 from async_asgi_testclient import TestClient
+from Crypto.PublicKey import RSA
+
+from aioauth_fastapi_demo.app import app
+from aioauth_fastapi_demo.oauth2.models import Client
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
+from aioauth_fastapi_demo.users.models import User
 
 rsa = RSA.generate(2048)
 

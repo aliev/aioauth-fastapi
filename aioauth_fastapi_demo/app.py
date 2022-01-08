@@ -1,15 +1,15 @@
 from fastapi import FastAPI
 from fastapi.param_functions import Security
 from fastapi.responses import ORJSONResponse
-from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi.security import APIKeyHeader
+from starlette.middleware.authentication import AuthenticationMiddleware
 
+from .admin import endpoints as admin_endpoints
 from .config import settings
+from .events import on_shutdown, on_startup
 from .oauth2 import endpoints as oauth2_endpoints
 from .users import endpoints as users_endpoints
-from .admin import endpoints as admin_endpoints
 from .users.backends import TokenAuthenticationBackend
-from .events import on_shutdown, on_startup
 
 api_key_header = APIKeyHeader(name="authorization", auto_error=False)
 
