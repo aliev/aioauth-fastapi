@@ -7,14 +7,14 @@ from aioauth_fastapi_demo.oauth2.models import Client
 from aioauth_fastapi_demo.users.crypto import get_jwt
 from async_asgi_testclient import TestClient
 from aioauth_fastapi_demo.users.models import User
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
 
 
 @pytest.mark.asyncio
 async def test_create_oauth2_client(
     http_client: TestClient,
     user: User,
-    db: SQLAlchemy,
+    db: SQLAlchemyStorage,
 ):
     access_token, _ = get_jwt(user)
 

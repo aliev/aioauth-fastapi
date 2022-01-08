@@ -2,11 +2,11 @@ from typing import List, Optional
 from pydantic.types import UUID4
 from sqlalchemy.sql.expression import delete, select, update
 from aioauth_fastapi_demo.oauth2.models import Client
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
 
 
 class Storage:
-    def __init__(self, database: SQLAlchemy) -> None:
+    def __init__(self, database: SQLAlchemyStorage) -> None:
         self.database = database
 
     async def client_list(self, user_id: UUID4) -> Optional[List[Client]]:

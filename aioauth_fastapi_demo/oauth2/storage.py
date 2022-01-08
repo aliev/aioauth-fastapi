@@ -9,7 +9,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.expression import delete
 
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
 from aioauth_fastapi_demo.users.crypto import encode_jwt, get_jwt
 
 from ..users.models import User
@@ -20,7 +20,7 @@ from .models import Token as TokenDB
 
 
 class Storage(BaseStorage):
-    def __init__(self, database: SQLAlchemy):
+    def __init__(self, database: SQLAlchemyStorage):
         self.database = database
 
     async def get_user(self, request: Request):

@@ -30,7 +30,7 @@ class SQLAlchemyTransaction:
         await self.session.close()
 
 
-class SQLAlchemy:
+class SQLAlchemyStorage:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.transaction = SQLAlchemyTransaction(session)
@@ -55,5 +55,10 @@ class SQLAlchemy:
 sqlalchemy_session: Optional[AsyncSession] = None
 
 
-def get_database() -> SQLAlchemy:
-    return SQLAlchemy(session=sqlalchemy_session)
+def get_sqlalchemy_storage() -> SQLAlchemyStorage:
+    """Get SQLAlchemy storage instance.
+
+    Returns:
+        SQLAlchemyStorage: SQLAlchemy storage instance
+    """
+    return SQLAlchemyStorage(session=sqlalchemy_session)

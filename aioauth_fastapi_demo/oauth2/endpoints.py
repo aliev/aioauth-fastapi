@@ -2,7 +2,10 @@ from fastapi import Request, Depends, APIRouter
 from aioauth.config import Settings
 
 from aioauth.server import AuthorizationServer
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy, get_database
+from aioauth_fastapi_demo.storage.sqlalchemy import (
+    SQLAlchemyStorage,
+    get_sqlalchemy_storage,
+)
 
 from aioauth_fastapi.forms import TokenForm, TokenIntrospectForm
 from aioauth_fastapi.utils import to_fastapi_response, to_oauth2_request
@@ -24,7 +27,7 @@ settings = Settings(
 async def token(
     request: Request,
     form: TokenForm = Depends(),
-    database: SQLAlchemy = Depends(get_database),
+    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
     storage = Storage(database=database)
     authorization_server = AuthorizationServer(storage=storage)
@@ -37,7 +40,7 @@ async def token(
 async def token_introspect(
     request: Request,
     form: TokenIntrospectForm = Depends(),
-    database: SQLAlchemy = Depends(get_database),
+    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
     storage = Storage(database=database)
     authorization_server = AuthorizationServer(storage=storage)
@@ -52,7 +55,7 @@ async def token_introspect(
 async def authorize(
     request: Request,
     query: Query = Depends(),
-    database: SQLAlchemy = Depends(get_database),
+    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
     storage = Storage(database=database)
     authorization_server = AuthorizationServer(storage=storage)

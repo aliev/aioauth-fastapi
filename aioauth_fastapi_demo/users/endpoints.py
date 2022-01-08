@@ -1,9 +1,9 @@
 from http import HTTPStatus
 from fastapi import HTTPException, Response, APIRouter
 from fastapi.params import Depends
-from aioauth_fastapi_demo.storage.sqlalchemy import get_database
+from aioauth_fastapi_demo.storage.sqlalchemy import get_sqlalchemy_storage
 
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
 from .storage import Storage
 from .requests import UserLogin, UserRegistration
 from .crypto import get_jwt
@@ -14,7 +14,8 @@ router = APIRouter()
 
 @router.post("/registration", name="users:registration")
 async def user_registration(
-    body: UserRegistration, database: SQLAlchemy = Depends(get_database)
+    body: UserRegistration,
+    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
     storage = Storage(database=database)
     await storage.create_user(**body.dict())
@@ -23,7 +24,9 @@ async def user_registration(
 
 @router.post("/login", name="users:login")
 async def user_login(
-    response: Response, body: UserLogin, database: SQLAlchemy = Depends(get_database)
+    response: Response,
+    body: UserLogin,
+    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
     storage = Storage(database=database)
     user = await storage.get_user(username=body.username)
