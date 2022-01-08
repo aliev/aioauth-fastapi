@@ -2,8 +2,8 @@ from typing import Optional
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
 
+from ..storage.sqlalchemy import SQLAlchemyStorage
 from .models import User
 
 

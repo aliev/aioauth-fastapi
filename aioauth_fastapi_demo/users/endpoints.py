@@ -1,9 +1,9 @@
 from http import HTTPStatus
 from fastapi import HTTPException, Response, APIRouter
 from fastapi.params import Depends
-from aioauth_fastapi_demo.storage.sqlalchemy import get_sqlalchemy_storage
 
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
+from ..storage.sqlalchemy import get_sqlalchemy_storage
+from ..storage.sqlalchemy import SQLAlchemyStorage
 from .storage import Storage
 from .requests import UserLogin, UserRegistration
 from .crypto import get_jwt

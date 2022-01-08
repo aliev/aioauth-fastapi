@@ -2,15 +2,14 @@ from fastapi import Request, Depends, APIRouter
 from aioauth.config import Settings
 
 from aioauth.server import AuthorizationServer
-from aioauth_fastapi_demo.storage.sqlalchemy import (
-    SQLAlchemyStorage,
-    get_sqlalchemy_storage,
-)
-
 from aioauth_fastapi.forms import TokenForm, TokenIntrospectForm
 from aioauth_fastapi.utils import to_fastapi_response, to_oauth2_request
 from aioauth.requests import Query
 
+from ..storage.sqlalchemy import (
+    SQLAlchemyStorage,
+    get_sqlalchemy_storage,
+)
 from ..config import settings as local_settings
 from .storage import Storage
 

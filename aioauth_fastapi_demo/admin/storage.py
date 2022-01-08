@@ -1,8 +1,9 @@
 from typing import List, Optional
 from pydantic.types import UUID4
 from sqlalchemy.sql.expression import delete, select, update
-from aioauth_fastapi_demo.oauth2.models import Client
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
+
+from ..oauth2.models import Client
+from ..storage.sqlalchemy import SQLAlchemyStorage
 
 
 class Storage:

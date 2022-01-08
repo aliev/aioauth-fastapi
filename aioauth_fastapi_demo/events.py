@@ -1,17 +1,16 @@
-from aioauth_fastapi_demo.storage import sqlalchemy
-from aioauth_fastapi_demo.config import settings
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
+from .storage import sqlalchemy
+from .config import settings
+
 
 async def create_sqlalchemy_connection():
     # NOTE: https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#using-multiple-asyncio-event-loops
     engine = create_async_engine(settings.PSQL_DSN, echo=True, poolclass=NullPool)
-    async_session = sessionmaker(
-        engine, expire_on_commit=False, class_=AsyncSession
-    )
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     sqlalchemy.sqlalchemy_session = async_session()
 
 
@@ -20,6 +19,9 @@ async def close_sqlalchemy_connection():
         await sqlalchemy.sqlalchemy_session.close()
 
 
-
-on_startup = [create_sqlalchemy_connection,]
-on_shutdown = [close_sqlalchemy_connection,]
+on_startup = [
+    create_sqlalchemy_connection,
+]
+on_shutdown = [
+    close_sqlalchemy_connection,
+]

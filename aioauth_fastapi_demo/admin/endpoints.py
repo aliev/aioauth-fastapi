@@ -3,9 +3,8 @@ from fastapi import Request, HTTPException, status, APIRouter
 from fastapi.params import Depends
 from pydantic import UUID4
 
-from aioauth_fastapi_demo.admin.storage import Storage
-from aioauth_fastapi_demo.storage.sqlalchemy import get_sqlalchemy_storage
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
+from .storage import Storage
+from ..storage.sqlalchemy import get_sqlalchemy_storage, SQLAlchemyStorage
 from .models import ClientCreate, ClientUpdate
 from ..oauth2.models import Client
 
