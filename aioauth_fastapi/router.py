@@ -17,9 +17,9 @@ Usage example
 
     app = FastAPI()
 
-    class Storage(BaseStorage):
+    class CRUD(BaseStorage):
         '''
-        Storage methods must be implemented here.
+        CRUD methods must be implemented here.
         '''
 
     # NOTE: Redefinition of the default aioauth settings
@@ -28,7 +28,7 @@ Usage example
         INSECURE_TRANSPORT=True,
     )
 
-    storage = Storage()
+    storage = CRUD()
     authorization_server = AuthorizationServer(storage)
 
     # Include FastAPI router with oauth2 endpoints.

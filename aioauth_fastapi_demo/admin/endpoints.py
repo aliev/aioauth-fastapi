@@ -6,8 +6,8 @@ from pydantic import UUID4
 
 from ..oauth2.models import Client
 from ..storage.sqlalchemy import SQLAlchemyStorage, get_sqlalchemy_storage
+from .crud import CRUD
 from .models import ClientCreate, ClientUpdate
-from .storage import Storage
 
 routers = APIRouter()
 
@@ -16,11 +16,11 @@ routers = APIRouter()
 async def client_create(
     request: Request,
     body: ClientCreate,
-    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
+    storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ) -> Client:
-    storage = Storage(database=database)
+    crud = CRUD(storage=storage)
     client = Client(**body.dict(), user_id=request.user.id)
-    await storage.create_client(client)
+    await crud.create(client)
     return client
 
 
@@ -28,10 +28,10 @@ async def client_create(
 async def client_details(
     request: Request,
     id: UUID4,
-    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
+    storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ) -> Client:
-    storage = Storage(database=database)
-    client = await storage.client_details(id, request.user.id)
+    crud = CRUD(storage=storage)
+    client = await crud.details(id, request.user.id)
 
     if not client:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
@@ -41,20 +41,20 @@ async def client_details(
 
 @routers.get("/", response_model=List[Client])
 async def client_list(
-    request: Request, database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage)
+    request: Request, storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage)
 ) -> Optional[List[Client]]:
-    storage = Storage(database=database)
-    return await storage.client_list(request.user.id)
+    crud = CRUD(storage=storage)
+    return await crud.list(request.user.id)
 
 
 @routers.delete("/{id}/")
 async def client_delete(
     request: Request,
     id: UUID4,
-    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
+    storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
-    storage = Storage(database=database)
-    await storage.client_delete(id, user_id=request.user.id)
+    crud = CRUD(storage=storage)
+    await crud.delete(id, user_id=request.user.id)
 
 
 @routers.patch("/{id}/", response_model=Client)
@@ -62,8 +62,8 @@ async def client_update(
     request: Request,
     body: ClientUpdate,
     id: UUID4,
-    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
+    storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ) -> Client:
-    storage = Storage(database=database)
+    crud = CRUD(storage=storage)
     client = Client(**body.dict(exclude_unset=True), user_id=request.user.id)
-    return await storage.client_update(id, client, user_id=request.user.id)
+    return await crud.update(id, client, user_id=request.user.id)

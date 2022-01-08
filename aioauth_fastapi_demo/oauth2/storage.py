@@ -19,8 +19,8 @@ from .models import Token as TokenDB
 
 
 class Storage(BaseStorage):
-    def __init__(self, database: SQLAlchemyStorage):
-        self.database = database
+    def __init__(self, storage: SQLAlchemyStorage):
+        self.storage = storage
 
     async def get_user(self, request: Request):
         user: Optional[User] = None
@@ -31,7 +31,7 @@ class Storage(BaseStorage):
 
         if request.post.grant_type == GrantType.TYPE_AUTHORIZATION_CODE:
             # If GrantType is authorization code get user from DB by code
-            q_results = await self.database.select(
+            q_results = await self.storage.select(
                 select(AuthorizationCodeDB).where(
                     AuthorizationCodeDB.code == request.post.code
                 )
@@ -43,7 +43,7 @@ class Storage(BaseStorage):
             if not authorization_code:
                 return
 
-            q_results = await self.database.select(
+            q_results = await self.storage.select(
                 select(User).where(User.id == authorization_code.user_id)
             )
 
@@ -51,7 +51,7 @@ class Storage(BaseStorage):
 
         if request.post.grant_type == GrantType.TYPE_REFRESH_TOKEN:
             # Get user from token
-            q_results = await self.database.select(
+            q_results = await self.storage.select(
                 select(TokenDB)
                 .where(TokenDB.refresh_token == request.post.refresh_token)
                 .options(selectinload(TokenDB.user))
@@ -72,7 +72,7 @@ class Storage(BaseStorage):
         self, request: Request, client_id: str, scope: str, *args, **kwargs
     ) -> Token:
         """
-        Create token and store it in database.
+        Create token and store it in storage.
         """
         user = await self.get_user(request)
 
@@ -95,7 +95,7 @@ class Storage(BaseStorage):
             user_id=user.id,
         )
 
-        await self.database.add(token_record)
+        await self.storage.add(token_record)
 
         return token
 
@@ -103,7 +103,7 @@ class Storage(BaseStorage):
         """
         Remove refresh_token from whitelist.
         """
-        q_results = await self.database.select(
+        q_results = await self.storage.select(
             select(TokenDB).where(TokenDB.refresh_token == refresh_token)
         )
         token_record: Optional[TokenDB]
@@ -111,7 +111,7 @@ class Storage(BaseStorage):
 
         if token_record:
             token_record.revoked = True
-            await self.database.add(token_record)
+            await self.storage.add(token_record)
 
     async def get_token(
         self,
@@ -126,7 +126,7 @@ class Storage(BaseStorage):
         else:
             q = select(TokenDB).where(TokenDB.access_token == access_token)
 
-        q_results = await self.database.select(
+        q_results = await self.storage.select(
             q.where(TokenDB.revoked == False).options(  # noqa
                 selectinload(TokenDB.user)
             )
@@ -167,14 +167,14 @@ class Storage(BaseStorage):
             user_id=request.user.id,
         )
 
-        await self.database.add(authorization_code_record)
+        await self.storage.add(authorization_code_record)
 
         return authorization_code
 
     async def get_client(
         self, request: Request, client_id: str, client_secret: Optional[str] = None
     ) -> Optional[Client]:
-        q_results = await self.database.select(
+        q_results = await self.storage.select(
             select(ClientDB).where(ClientDB.client_id == client_id)
         )
 
@@ -196,7 +196,7 @@ class Storage(BaseStorage):
     async def get_authorization_code(
         self, request: Request, client_id: str, code: str
     ) -> Optional[AuthorizationCode]:
-        q_results = await self.database.select(
+        q_results = await self.storage.select(
             select(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
         )
 
@@ -222,7 +222,7 @@ class Storage(BaseStorage):
     async def delete_authorization_code(
         self, request: Request, client_id: str, code: str
     ) -> None:
-        await self.database.delete(
+        await self.storage.delete(
             delete(AuthorizationCodeDB).where(AuthorizationCodeDB.code == code)
         )
 

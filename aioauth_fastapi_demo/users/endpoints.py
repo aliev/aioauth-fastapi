@@ -4,10 +4,10 @@ from fastapi import APIRouter, HTTPException, Response
 from fastapi.params import Depends
 
 from ..storage.sqlalchemy import SQLAlchemyStorage, get_sqlalchemy_storage
+from .crud import CRUD
 from .crypto import get_jwt
 from .requests import UserLogin, UserRegistration
 from .responses import TokenResponse
-from .storage import Storage
 
 router = APIRouter()
 
@@ -15,10 +15,10 @@ router = APIRouter()
 @router.post("/registration", name="users:registration")
 async def user_registration(
     body: UserRegistration,
-    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
+    storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
-    storage = Storage(database=database)
-    await storage.create_user(**body.dict())
+    crud = CRUD(storage=storage)
+    await crud.create(**body.dict())
     return Response(status_code=HTTPStatus.NO_CONTENT)
 
 
@@ -26,10 +26,10 @@ async def user_registration(
 async def user_login(
     response: Response,
     body: UserLogin,
-    database: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
+    storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
-    storage = Storage(database=database)
-    user = await storage.get_user(username=body.username)
+    crud = CRUD(storage=storage)
+    user = await crud.get(username=body.username)
 
     if user is None:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
