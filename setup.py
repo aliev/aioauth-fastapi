@@ -16,7 +16,7 @@ with open("README.md") as readme_file:
 
 require_dev = [
     "fastapi==0.70.1",
-    "aioauth==1.2.0",
+    "aioauth==1.3.0",
     "uvicorn==0.16.0",
     "wheel",
     "twine==3.7.1",

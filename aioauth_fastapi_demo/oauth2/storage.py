@@ -39,7 +39,7 @@ class Storage(BaseStorage):
             )
 
             authorization_code: Optional[AuthorizationCodeDB]
-            authorization_code = q_results.one_or_none()
+            authorization_code = q_results.scalars().one_or_none()
 
             if not authorization_code:
                 return
@@ -48,7 +48,7 @@ class Storage(BaseStorage):
                 select(User).where(User.id == authorization_code.user_id)
             )
 
-            user = q_results.one_or_none()
+            user = q_results.scalars().one_or_none()
 
         if request.post.grant_type == GrantType.TYPE_REFRESH_TOKEN:
             # Get user from token
@@ -60,7 +60,7 @@ class Storage(BaseStorage):
 
             token: Optional[TokenDB]
 
-            token = q_results.one_or_none()
+            token = q_results.scalars().one_or_none()
 
             if not token:
                 return
@@ -108,7 +108,7 @@ class Storage(BaseStorage):
             select(TokenDB).where(TokenDB.refresh_token == refresh_token)
         )
         token_record: Optional[TokenDB]
-        token_record = q_results.one_or_none()
+        token_record = q_results.scalars().one_or_none()
 
         if token_record:
             token_record.revoked = True
@@ -134,7 +134,7 @@ class Storage(BaseStorage):
         )
 
         token_record: Optional[TokenDB]
-        token_record = q_results.one_or_none()
+        token_record = q_results.scalars().one_or_none()
 
         if token_record:
             return Token(
@@ -180,7 +180,7 @@ class Storage(BaseStorage):
         )
 
         client_record: Optional[ClientDB]
-        client_record = q_results.one_or_none()
+        client_record = q_results.scalars().one_or_none()
 
         if not client_record:
             return None
@@ -202,7 +202,7 @@ class Storage(BaseStorage):
         )
 
         authorization_code_record: Optional[AuthorizationCode]
-        authorization_code_record = q_results.one_or_none()
+        authorization_code_record = q_results.scalars().one_or_none()
 
         if not authorization_code_record:
             return None

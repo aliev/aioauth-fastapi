@@ -41,12 +41,8 @@ async def test_create_oauth2_client(
 
     response_json = response.json()
 
-    results = await db.session.execute(
-        select(Client).where(Client.id == response_json["id"])
-    )
+    results = await db.select(select(Client).where(Client.id == response_json["id"]))
 
-    await db.session.close()
-
-    client = results.scalar()
+    client = results.scalars().one_or_none()
 
     assert client

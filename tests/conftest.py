@@ -59,9 +59,7 @@ def user_password():
 async def user(db: "SQLAlchemy", user_password: str) -> User:
     user = User(is_superuser=True, is_active=True, username="admin@admin.com")
     user.set_password(user_password)
-    db.session.add(user)
-    await db.session.commit()
-    await db.session.close()
+    await db.add(user)
 
     return user
 
@@ -97,8 +95,6 @@ async def client(db: "SQLAlchemy", user: "User") -> Client:
         user_id=user.id,
     )
 
-    db.session.add(client)
-    await db.session.commit()
-    await db.session.close()
+    await db.add(client)
 
     return client

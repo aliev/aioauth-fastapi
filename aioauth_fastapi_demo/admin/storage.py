@@ -14,7 +14,7 @@ class Storage:
             select(Client).where(Client.user_id == user_id)
         )
 
-        return q_results.fetchall()
+        return q_results.scalars().fetchall()
 
     async def create_client(self, client: Client) -> None:
         await self.database.add(client)
@@ -29,7 +29,7 @@ class Storage:
             select(Client).where(Client.id == id).where(Client.user_id == user_id)
         )
 
-        return q_results.one_or_none()
+        return q_results.scalars().one_or_none()
 
     async def client_update(self, id: UUID4, client: Client, user_id: UUID4) -> Client:
         await self.database.update(

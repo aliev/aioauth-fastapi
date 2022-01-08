@@ -21,7 +21,7 @@ class Storage:
             .where(User.username == username)
         )
 
-        return q_results.one_or_none()
+        return q_results.scalars().one_or_none()
 
     async def create_user(self, **kwargs) -> None:
         user = User(**kwargs)
