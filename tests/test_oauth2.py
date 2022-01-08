@@ -1,30 +1,32 @@
-from aioauth_fastapi_demo.users.crypto import get_jwt
 from http import HTTPStatus
-import pytest
 from urllib import parse
+
+import pytest
 from aioauth.types import GrantType, ResponseType
-from aioauth_fastapi_demo.users.models import User
+from async_asgi_testclient import TestClient
+
 from aioauth_fastapi_demo.oauth2.models import Client
-from httpx import AsyncClient
+from aioauth_fastapi_demo.users.crypto import get_jwt
+from aioauth_fastapi_demo.users.models import User
 
 
 @pytest.mark.asyncio
 async def test_authorization_code_flow(
-    http_client: AsyncClient, user: "User", client: "Client"
+    http_client: TestClient, user: "User", client: "Client"
 ):
     access_token, _ = get_jwt(user)
 
     response = await http_client.get(
         "/oauth2/authorize",
-        params={
+        query_string={
             "response_type": f"{ResponseType.TYPE_CODE.value} {ResponseType.TYPE_ID_TOKEN.value}",
             "client_id": client.client_id,
             "redirect_uri": client.redirect_uris[0],
             "scope": "openid email profile",
             "nonce": "73Ncd3",
         },
-        cookies={"access_token": access_token},
-        follow_redirects=False,
+        headers={"Authorization": f"Bearer {access_token}"},
+        allow_redirects=False,
     )
 
     assert response.status_code == HTTPStatus.FOUND
@@ -38,7 +40,7 @@ async def test_authorization_code_flow(
 
     response = await http_client.post(
         "/oauth2/token",
-        data={
+        form={
             "grant_type": GrantType.TYPE_AUTHORIZATION_CODE.value,
             "redirect_uri": client.redirect_uris[0],
             "client_id": client.client_id,
@@ -53,7 +55,7 @@ async def test_authorization_code_flow(
 
     response = await http_client.post(
         "/oauth2/token",
-        data={
+        form={
             "grant_type": GrantType.TYPE_REFRESH_TOKEN.value,
             "refresh_token": refresh_token,
             "client_id": client.client_id,
@@ -66,7 +68,7 @@ async def test_authorization_code_flow(
     # re-try token revokation with revoked token should be rejected
     response = await http_client.post(
         "/oauth2/token",
-        data={
+        form={
             "grant_type": GrantType.TYPE_REFRESH_TOKEN.value,
             "refresh_token": refresh_token,
             "client_id": client.client_id,
@@ -79,18 +81,18 @@ async def test_authorization_code_flow(
 
 
 @pytest.mark.asyncio
-async def test_implicit_flow(http_client: AsyncClient, user: "User", client: "Client"):
+async def test_implicit_flow(http_client: TestClient, user: "User", client: "Client"):
     access_token, _ = get_jwt(user)
 
     response = await http_client.get(
         "/oauth2/authorize",
-        params={
+        query_string={
             "response_type": ResponseType.TYPE_TOKEN.value,
             "client_id": client.client_id,
             "redirect_uri": client.redirect_uris[0],
         },
-        cookies={"access_token": access_token},
-        follow_redirects=False,
+        headers={"Authorization": f"Bearer {access_token}"},
+        allow_redirects=False,
     )
 
     assert response.headers.get("location")

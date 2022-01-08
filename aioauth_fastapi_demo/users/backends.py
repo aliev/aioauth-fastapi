@@ -1,6 +1,7 @@
-from aioauth_fastapi_demo.users.crypto import authenticate
-from starlette.authentication import AuthCredentials, AuthenticationBackend
 from fastapi.security.utils import get_authorization_scheme_param
+from starlette.authentication import AuthCredentials, AuthenticationBackend
+
+from aioauth_fastapi_demo.users.crypto import authenticate
 
 from ..config import settings
 from .models import User, UserAnonymous
@@ -11,14 +12,12 @@ class TokenAuthenticationBackend(AuthenticationBackend):
         authorization: str = request.headers.get("Authorization")
         _, bearer_token = get_authorization_scheme_param(authorization)
 
-        token: str = request.cookies.get("access_token") or bearer_token
-
-        if not token:
+        if not bearer_token:
             return AuthCredentials(), UserAnonymous()
 
         key = settings.JWT_PUBLIC_KEY
 
-        is_authenticated, decoded_token = authenticate(token=token, key=key)
+        is_authenticated, decoded_token = authenticate(token=bearer_token, key=key)
 
         if is_authenticated:
             return AuthCredentials(), User(

@@ -1,50 +1,65 @@
-from contextlib import asynccontextmanager
+from typing import Optional
 
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.engine.result import ScalarResult
-from sqlalchemy.sql.selectable import Select
+from sqlalchemy.engine.result import Result
 from sqlalchemy.sql.expression import Delete, Update
-from sqlalchemy.pool import NullPool
+from sqlalchemy.sql.selectable import Select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
-class SQLAlchemy:
-    def __init__(self, dsn: str) -> None:
-        # NOTE: https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#using-multiple-asyncio-event-loops
-        self.engine = create_async_engine(dsn, echo=True, poolclass=NullPool)
-        self.async_session = sessionmaker(
-            self.engine, expire_on_commit=False, class_=AsyncSession
-        )
+class SQLAlchemyTransaction:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
 
-    @asynccontextmanager
-    async def session(self):
-        async with self.async_session() as session:
-            async with session.begin():
-                try:
-                    yield session
-                except Exception:
-                    await session.rollback()
-                    raise
-                finally:
-                    await session.close()
+    async def __aenter__(self) -> "SQLAlchemyTransaction":
+        return self
 
-    async def select(self, q: Select) -> ScalarResult:
-        async with self.session() as session:
-            results = await session.execute(q)
-            return results.scalars()
+    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
+        if exc_type is None:
+            await self.commit()
+        else:
+            await self.rollback()
+
+        await self.close()
+
+    async def rollback(self):
+        await self.session.rollback()
+
+    async def commit(self):
+        await self.session.commit()
+
+    async def close(self):
+        await self.session.close()
+
+
+class SQLAlchemyStorage:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+        self.transaction = SQLAlchemyTransaction(session)
+
+    async def select(self, q: Select) -> Result:
+        async with self.transaction:
+            return await self.session.execute(q)
 
     async def add(self, model) -> None:
-        async with self.session() as session:
-            session.add(model)
-            await session.commit()
+        async with self.transaction:
+            self.session.add(model)
 
     async def delete(self, q: Delete) -> None:
-        async with self.session() as session:
-            await session.execute(q)
-            await session.commit()
+        async with self.transaction:
+            await self.session.execute(q)
 
     async def update(self, q: Update):
-        async with self.session() as session:
-            await session.execute(q)
-            await session.commit()
+        async with self.transaction:
+            await self.session.execute(q)
+
+
+sqlalchemy_session: Optional[AsyncSession] = None
+
+
+def get_sqlalchemy_storage() -> SQLAlchemyStorage:
+    """Get SQLAlchemy storage instance.
+
+    Returns:
+        SQLAlchemyStorage: SQLAlchemy storage instance
+    """
+    return SQLAlchemyStorage(session=sqlalchemy_session)

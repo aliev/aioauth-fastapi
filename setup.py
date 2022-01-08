@@ -16,7 +16,7 @@ with open("README.md") as readme_file:
 
 require_dev = [
     "fastapi==0.70.1",
-    "aioauth==1.2.0",
+    "aioauth==1.3.0",
     "uvicorn==0.16.0",
     "wheel",
     "twine==3.7.1",
@@ -25,11 +25,10 @@ require_dev = [
     "SQLAlchemy[asyncio]==1.4.28",
     "orjson==3.6.5",
     "python-jose[pycryptodome]==3.3.0",
-    "dependency-injector==4.37.0",
     "python-multipart==0.0.5",
     "alembic==1.7.5",
     "sqlmodel==0.0.5",
-    "httpx==0.21.1",
+    "async-asgi-testclient==1.4.9",
     "pre-commit==2.16.0",
     "pytest==6.2.5",
     "pytest-asyncio==0.16.0",

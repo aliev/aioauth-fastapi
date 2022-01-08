@@ -13,9 +13,8 @@ Used to generate an OpenAPI schema.
 from dataclasses import dataclass
 from typing import Optional
 
-from fastapi.params import Form
-
 from aioauth.types import GrantType, TokenType
+from fastapi.params import Form
 
 
 @dataclass

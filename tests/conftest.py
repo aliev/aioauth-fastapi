@@ -1,21 +1,18 @@
-from aioauth.types import GrantType, ResponseType
-from aioauth_fastapi_demo.oauth2.models import Client
 import logging
 from uuid import uuid4
-from aioauth_fastapi_demo.config import Settings
-from aioauth_fastapi_demo.users.models import User
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
-from typing import TYPE_CHECKING
-from httpx import AsyncClient
+
 import pytest
+from aioauth.types import GrantType, ResponseType
 from alembic.config import main
+from async_asgi_testclient import TestClient
 from Crypto.PublicKey import RSA
 
+from aioauth_fastapi_demo.app import app
+from aioauth_fastapi_demo.oauth2.models import Client
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
+from aioauth_fastapi_demo.users.models import User
+
 rsa = RSA.generate(2048)
-
-
-if TYPE_CHECKING:  # pragma: no cover
-    from fastapi.applications import FastAPI
 
 
 @pytest.fixture(autouse=True)
@@ -41,21 +38,17 @@ def migrations():
 
 
 @pytest.fixture
-def app() -> "FastAPI":
-    from aioauth_fastapi_demo.app import app as _app
+@pytest.mark.asyncio
+async def db() -> SQLAlchemyStorage:
+    from aioauth_fastapi_demo.storage.sqlalchemy import get_sqlalchemy_storage
 
-    return _app
-
-
-@pytest.fixture
-def db(settings: Settings) -> SQLAlchemy:
-    return SQLAlchemy(settings.PSQL_DSN)
+    return get_sqlalchemy_storage()
 
 
 @pytest.fixture
 @pytest.mark.asyncio
-async def http_client(app: "FastAPI"):
-    async with AsyncClient(app=app, base_url="http://test") as client:
+async def http_client():
+    async with TestClient(application=app) as client:
         yield client
 
 
@@ -65,19 +58,16 @@ def user_password():
 
 
 @pytest.fixture
-async def user(db: "SQLAlchemy", user_password: str) -> User:
+async def user(db: "SQLAlchemyStorage", user_password: str) -> User:
     user = User(is_superuser=True, is_active=True, username="admin@admin.com")
     user.set_password(user_password)
-
-    async with db.session() as session:
-        session.add(user)
-        await session.commit()
+    await db.add(user)
 
     return user
 
 
 @pytest.fixture
-async def client(db: "SQLAlchemy", user: "User") -> Client:
+async def client(db: "SQLAlchemyStorage", user: "User") -> Client:
     client_id = uuid4()
     client_secret = uuid4()
     grant_types = [
@@ -107,8 +97,6 @@ async def client(db: "SQLAlchemy", user: "User") -> Client:
         user_id=user.id,
     )
 
-    async with db.session() as session:
-        session.add(client)
-        await session.commit()
+    await db.add(client)
 
     return client

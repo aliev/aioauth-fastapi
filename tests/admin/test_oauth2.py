@@ -1,25 +1,24 @@
-import pytest
-import httpx
 import uuid
 from http import HTTPStatus
+
+import pytest
 from aioauth.types import GrantType, ResponseType
+from async_asgi_testclient import TestClient
 from sqlalchemy.sql.expression import select
+
 from aioauth_fastapi_demo.oauth2.models import Client
+from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemyStorage
 from aioauth_fastapi_demo.users.crypto import get_jwt
-from httpx import AsyncClient
 from aioauth_fastapi_demo.users.models import User
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
 
 
 @pytest.mark.asyncio
 async def test_create_oauth2_client(
-    http_client: AsyncClient,
+    http_client: TestClient,
     user: User,
-    db: SQLAlchemy,
+    db: SQLAlchemyStorage,
 ):
     access_token, _ = get_jwt(user)
-    cookies = httpx.Cookies()
-    cookies.set("access_token", access_token)
 
     client_id = str(uuid.uuid4())
     client_secret = str(uuid.uuid4())
@@ -35,8 +34,8 @@ async def test_create_oauth2_client(
 
     response = await http_client.post(
         "/api/admin/",
-        cookies=cookies,
-        follow_redirects=False,
+        headers={"Authorization": f"Bearer {access_token}"},
+        allow_redirects=False,
         json=body,
     )
 
@@ -44,11 +43,8 @@ async def test_create_oauth2_client(
 
     response_json = response.json()
 
-    async with db.session() as session:
-        results = await session.execute(
-            select(Client).where(Client.id == response_json["id"])
-        )
+    results = await db.select(select(Client).where(Client.id == response_json["id"]))
 
-    client = results.scalar()
+    client = results.scalars().one_or_none()
 
     assert client

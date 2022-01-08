@@ -2,17 +2,17 @@ from typing import Optional
 
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from aioauth_fastapi_demo.storage.sqlalchemy import SQLAlchemy
 
+from ..storage.sqlalchemy import SQLAlchemyStorage
 from .models import User
 
 
-class Storage:
-    def __init__(self, database: SQLAlchemy):
-        self.database = database
+class CRUD:
+    def __init__(self, storage: SQLAlchemyStorage):
+        self.storage = storage
 
-    async def get_user(self, username: str) -> Optional[User]:
-        q_results = await self.database.select(
+    async def get(self, username: str) -> Optional[User]:
+        q_results = await self.storage.select(
             select(User)
             .options(
                 # for relationship loading, eager loading should be applied.
@@ -21,9 +21,9 @@ class Storage:
             .where(User.username == username)
         )
 
-        return q_results.one_or_none()
+        return q_results.scalars().one_or_none()
 
-    async def create_user(self, **kwargs) -> None:
+    async def create(self, **kwargs) -> None:
         user = User(**kwargs)
         user.set_password(kwargs.get("password"))
-        await self.database.add(user)
+        await self.storage.add(user)
