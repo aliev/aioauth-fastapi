@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Request, status
-from fastapi.params import Depends
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import UUID4
 
 from ..oauth2.models import Client

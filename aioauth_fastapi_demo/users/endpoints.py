@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, HTTPException, Response
-from fastapi.params import Depends
+from fastapi import APIRouter, Depends, HTTPException, Response
 
 from ..config import settings
 from ..storage.sqlalchemy import SQLAlchemyStorage, get_sqlalchemy_storage
