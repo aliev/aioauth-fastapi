@@ -20,3 +20,6 @@ async def test_registration(http_client: TestClient):
     assert response.status_code == HTTPStatus.OK
     assert "access_token" in response.json()
     assert "refresh_token" in response.json()
+
+    assert "access_token" in response.cookies
+    assert "refresh_token" in response.cookies
