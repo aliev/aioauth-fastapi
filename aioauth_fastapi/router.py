@@ -17,9 +17,9 @@ Usage example
 
     app = FastAPI()
 
-    class CRUD(BaseStorage):
+    class SQLAlchemyCRUD(BaseStorage):
         '''
-        CRUD methods must be implemented here.
+        SQLAlchemyCRUD methods must be implemented here.
         '''
 
     # NOTE: Redefinition of the default aioauth settings
@@ -28,7 +28,7 @@ Usage example
         INSECURE_TRANSPORT=True,
     )
 
-    storage = CRUD()
+    storage = SQLAlchemyCRUD()
     authorization_server = AuthorizationServer(storage)
 
     # Include FastAPI router with oauth2 endpoints.

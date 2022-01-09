@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 
 from ..config import settings
 from ..storage.sqlalchemy import SQLAlchemyStorage, get_sqlalchemy_storage
-from .crud import CRUD
+from .crud import SQLAlchemyCRUD
 from .crypto import get_jwt
 from .requests import UserLogin, UserRegistration
 from .responses import TokenResponse
@@ -17,7 +17,7 @@ async def user_registration(
     body: UserRegistration,
     storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
-    crud = CRUD(storage=storage)
+    crud = SQLAlchemyCRUD(storage=storage)
     await crud.create(**body.dict())
     return Response(status_code=HTTPStatus.NO_CONTENT)
 
@@ -28,7 +28,7 @@ async def user_login(
     body: UserLogin,
     storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
-    crud = CRUD(storage=storage)
+    crud = SQLAlchemyCRUD(storage=storage)
     user = await crud.get(username=body.username)
 
     if user is None:

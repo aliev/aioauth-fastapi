@@ -7,7 +7,7 @@ from ..storage.sqlalchemy import SQLAlchemyStorage
 from .models import User
 
 
-class CRUD:
+class SQLAlchemyCRUD:
     def __init__(self, storage: SQLAlchemyStorage):
         self.storage = storage
 

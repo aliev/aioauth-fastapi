@@ -5,7 +5,7 @@ from pydantic import UUID4
 
 from ..oauth2.models import Client
 from ..storage.sqlalchemy import SQLAlchemyStorage, get_sqlalchemy_storage
-from .crud import CRUD
+from .crud import SQLAlchemyCRUD
 from .models import ClientCreate, ClientUpdate
 
 routers = APIRouter()
@@ -17,10 +17,8 @@ async def client_create(
     body: ClientCreate,
     storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ) -> Client:
-    crud = CRUD(storage=storage)
-    client = Client(**body.dict(), user_id=request.user.id)
-    await crud.create(client)
-    return client
+    crud = SQLAlchemyCRUD(storage=storage)
+    return await crud.create(**{**body.dict(), "user_id": request.user.id})
 
 
 @routers.get("/{id}/", response_model=Client)
@@ -29,7 +27,7 @@ async def client_details(
     id: UUID4,
     storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ) -> Client:
-    crud = CRUD(storage=storage)
+    crud = SQLAlchemyCRUD(storage=storage)
     client = await crud.details(id, request.user.id)
 
     if not client:
@@ -42,7 +40,7 @@ async def client_details(
 async def client_list(
     request: Request, storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage)
 ) -> Optional[List[Client]]:
-    crud = CRUD(storage=storage)
+    crud = SQLAlchemyCRUD(storage=storage)
     return await crud.list(request.user.id)
 
 
@@ -52,7 +50,7 @@ async def client_delete(
     id: UUID4,
     storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ):
-    crud = CRUD(storage=storage)
+    crud = SQLAlchemyCRUD(storage=storage)
     await crud.delete(id, user_id=request.user.id)
 
 
@@ -63,6 +61,7 @@ async def client_update(
     id: UUID4,
     storage: SQLAlchemyStorage = Depends(get_sqlalchemy_storage),
 ) -> Client:
-    crud = CRUD(storage=storage)
-    client = Client(**body.dict(exclude_unset=True), user_id=request.user.id)
-    return await crud.update(id, client, user_id=request.user.id)
+    crud = SQLAlchemyCRUD(storage=storage)
+    return await crud.update(
+        id, **{**body.dict(exclude_unset=True), "user_id": request.user.id}
+    )

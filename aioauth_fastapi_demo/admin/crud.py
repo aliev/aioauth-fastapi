@@ -7,7 +7,7 @@ from ..oauth2.models import Client
 from ..storage.sqlalchemy import SQLAlchemyStorage
 
 
-class CRUD:
+class SQLAlchemyCRUD:
     def __init__(self, storage: SQLAlchemyStorage) -> None:
         self.storage = storage
 
@@ -18,8 +18,10 @@ class CRUD:
 
         return q_results.scalars().fetchall()
 
-    async def create(self, client: Client) -> None:
+    async def create(self, **kwargs) -> Client:
+        client = Client(**kwargs)
         await self.storage.add(client)
+        return client
 
     async def delete(self, id: UUID4, user_id: UUID4) -> None:
         await self.storage.delete(
@@ -33,11 +35,13 @@ class CRUD:
 
         return q_results.scalars().one_or_none()
 
-    async def update(self, id: UUID4, client: Client, user_id: UUID4) -> Client:
+    async def update(self, id: UUID4, **kwargs) -> Client:
+        client = Client(**kwargs)
+
         await self.storage.update(
             update(Client)
             .where(Client.id == id)
-            .where(Client.user_id == user_id)
+            .where(Client.user_id == client.user_id)
             .values(**client.dict(exclude={"id": True}))
         )
 
