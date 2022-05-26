@@ -2,7 +2,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from starlette.authentication import AuthCredentials, AuthenticationBackend
 
 from ..config import settings
-from .crypto import authenticate, read_key_from_env_var_file_path
+from .crypto import authenticate, read_rsa_key_from_env
 from .models import User, UserAnonymous
 
 
@@ -16,7 +16,7 @@ class TokenAuthenticationBackend(AuthenticationBackend):
         if not token:
             return AuthCredentials(), UserAnonymous()
 
-        key = read_key_from_env_var_file_path(settings.JWT_PUBLIC_KEY)
+        key = read_rsa_key_from_env(settings.JWT_PUBLIC_KEY)
 
         is_authenticated, decoded_token = authenticate(token=token, key=key)
 

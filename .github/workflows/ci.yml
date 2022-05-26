@@ -11,10 +11,8 @@ jobs:
     name: Continuous integration
     runs-on: ubuntu-latest
     env:
-      JWT_PUBLIC_KEY_CONTENTS: ${{ secrets.JWT_PUBLIC_KEY }}
-      JWT_PRIVATE_KEY_CONTENTS: ${{ secrets.JWT_PRIVATE_KEY }}
-      JWT_PUBLIC_KEY: ./jwt_key.pub
-      JWT_PRIVATE_KEY: ./jwt_key
+      JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
+      JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
       PSQL_DSN: postgresql+asyncpg://postgres:aioauth_fastapi_demo@localhost:5432/aioauth_fastapi_demo
     services:
       postgres:
@@ -42,11 +40,6 @@ jobs:
     - name: Run lint
       run: |
         make lint
-    - name: Copy JWT keys to files
-      shell: bash
-      run: |
-        echo "$JWT_PUBLIC_KEY_CONTENTS" > ./jwt_key.pub
-        echo "$JWT_PRIVATE_KEY_CONTENTS" > ./jwt_key
     - name: Run tests
       run: |
         make test
