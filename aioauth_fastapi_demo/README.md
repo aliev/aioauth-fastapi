@@ -30,13 +30,10 @@ Apply migrations
 alembic upgrade head
 ```
 
-Create .env file:
+Create .env file (and adjust to your local setup):
 
 ```
-PSQL_DSN=postgresql+asyncpg://user@localhost/database
-DEBUG=True
-JWT_PRIVATE_KEY=''
-JWT_PUBLIC_KEY=''
+cp .env.dist .env
 ```
 
 Run local server
