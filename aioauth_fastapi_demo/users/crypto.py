@@ -70,6 +70,12 @@ def make_random_password() -> str:
     return "".join(secrets.choice(alphabet) for _ in range(16))
 
 
+def read_key_from_env_var_file_path(file_path: str) -> str:
+    with open(file_path, "rb") as key_file:
+        jwt_private_key = RSA.importKey(key_file.read()).exportKey()
+    return jwt_private_key.decode("utf-8")
+
+
 def encode_jwt(
     expires_delta,
     sub,
@@ -110,7 +116,7 @@ def decode_jwt(
 def get_jwt(user):
     access_token = encode_jwt(
         sub=str(user.id),
-        secret=settings.JWT_PRIVATE_KEY,
+        secret=read_key_from_env_var_file_path(settings.JWT_PRIVATE_KEY),
         expires_delta=settings.ACCESS_TOKEN_EXP,
         additional_claims={
             "token_type": "access",
@@ -123,7 +129,7 @@ def get_jwt(user):
 
     refresh_token = encode_jwt(
         sub=str(user.id),
-        secret=settings.JWT_PRIVATE_KEY,
+        secret=read_key_from_env_var_file_path(settings.JWT_PRIVATE_KEY),
         expires_delta=settings.REFRESH_TOKEN_EXP,
         additional_claims={
             "token_type": "refresh",
