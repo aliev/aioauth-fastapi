@@ -24,16 +24,21 @@ Install requirements:
 pip install -e ."[dev]"
 ```
 
+Run database server
+
+```
+docker compose up
+```
+
+Create .env file (and adjust to your local setup):
+```
+cp .env.dist .env
+```
+
 Apply migrations
 
 ```
 alembic upgrade head
-```
-
-Create .env file (and adjust to your local setup):
-
-```
-cp .env.dist .env
 ```
 
 Run local server
