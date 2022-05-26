@@ -4,7 +4,7 @@ Demo server was deployed to heroku: [https://aioauth-fastapi.herokuapp.com/api/o
 
 It can be tested on [https://openidconnect.net/](https://openidconnect.net/) and [https://oidcdebugger.com/](https://oidcdebugger.com/) playgrounds.
 
-### Client credentils of demo server
+### Client credentials of demo server
 
 ```
 Authorization Endpoint: https://aioauth-fastapi.herokuapp.com/oauth2/authorize

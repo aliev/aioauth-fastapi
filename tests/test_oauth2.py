@@ -77,7 +77,7 @@ async def test_authorization_code_flow(
     )
     assert (
         response.status_code == HTTPStatus.BAD_REQUEST
-    ), "re-try token revokation with revoked token should be rejected"
+    ), "re-trying to revoke an already revoked token should be rejected"
 
 
 @pytest.mark.asyncio
