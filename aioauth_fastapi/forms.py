@@ -35,4 +35,4 @@ class TokenForm:
 @dataclass
 class TokenIntrospectForm:
     token: Optional[str] = Form(None)
-    token_type: Optional[TokenType] = Form(None)
+    token_type_hint: Optional[TokenType] = Form(None)

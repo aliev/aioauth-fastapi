@@ -4,7 +4,7 @@ Demo server was deployed to heroku: [https://aioauth-fastapi.herokuapp.com/api/o
 
 It can be tested on [https://openidconnect.net/](https://openidconnect.net/) and [https://oidcdebugger.com/](https://oidcdebugger.com/) playgrounds.
 
-### Client credentils of demo server
+### Client credentials of demo server
 
 ```
 Authorization Endpoint: https://aioauth-fastapi.herokuapp.com/oauth2/authorize
@@ -24,19 +24,21 @@ Install requirements:
 pip install -e ."[dev]"
 ```
 
+Run database server
+
+```
+docker compose up
+```
+
+Create .env file (and adjust to your local setup):
+```
+cp .env.dist .env
+```
+
 Apply migrations
 
 ```
 alembic upgrade head
-```
-
-Create .env file:
-
-```
-PSQL_DSN=SQLAlchemy+asyncpg://user@localhost/database
-DEBUG=True
-JWT_PRIVATE_KEY=''
-JWT_PUBLIC_KEY=''
 ```
 
 Run local server

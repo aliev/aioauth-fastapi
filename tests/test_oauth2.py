@@ -2,7 +2,7 @@ from http import HTTPStatus
 from urllib import parse
 
 import pytest
-from aioauth.types import GrantType, ResponseType
+from aioauth.types import GrantType, ResponseType, TokenType
 from async_asgi_testclient import TestClient
 
 from aioauth_fastapi_demo.oauth2.models import Client
@@ -77,7 +77,7 @@ async def test_authorization_code_flow(
     )
     assert (
         response.status_code == HTTPStatus.BAD_REQUEST
-    ), "re-try token revokation with revoked token should be rejected"
+    ), "re-trying to revoke an already revoked token should be rejected"
 
 
 @pytest.mark.asyncio
@@ -96,3 +96,27 @@ async def test_implicit_flow(http_client: TestClient, user: "User", client: "Cli
     )
 
     assert response.headers.get("location")
+
+
+@pytest.mark.asyncio
+async def test_token_introspection(
+    http_client: TestClient, user: "User", client: "Client"
+):
+    access_token, _ = get_jwt(user)
+
+    with pytest.raises(TypeError):
+        introspect_response = await http_client.post(
+            "/oauth2/token/introspect",
+            form={"token": access_token, "token_type": TokenType.ACCESS.value},
+            # empty basic auth header to ensure get client passes
+            headers={"Authorization": "Basic Og=="},
+        )
+
+    # correct case
+    introspect_response = await http_client.post(
+        "/oauth2/token/introspect",
+        form={"token": access_token, "token_type_hint": TokenType.ACCESS.value},
+        headers={"Authorization": "Basic Og=="},
+    )
+
+    assert introspect_response.status_code == HTTPStatus.OK

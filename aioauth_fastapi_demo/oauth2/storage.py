@@ -11,7 +11,7 @@ from sqlalchemy.sql.expression import delete
 
 from ..config import settings
 from ..storage.sqlalchemy import SQLAlchemyStorage
-from ..users.crypto import encode_jwt, get_jwt
+from ..users.crypto import encode_jwt, get_jwt, read_rsa_key_from_env
 from ..users.models import User
 from .models import AuthorizationCode as AuthorizationCodeDB
 from .models import Client as ClientDB
@@ -244,6 +244,6 @@ class Storage(BaseStorage):
         return encode_jwt(
             expires_delta=settings.ACCESS_TOKEN_EXP,
             sub=str(request.user.id),
-            secret=settings.JWT_PRIVATE_KEY,
+            secret=read_rsa_key_from_env(settings.JWT_PRIVATE_KEY),
             additional_claims=user_data,
         )

@@ -56,11 +56,11 @@ def get_oauth2_router(
     """Function will create FastAPI router with the following oauth2 endpoints:
 
         * POST /token
-            * Endpoint creates token response by :py:meth:`aioauth.server.AuthorizationServer.create_token_response`
+            * Endpoint creates a token response by :py:meth:`aioauth.server.AuthorizationServer.create_token_response`
         * POST `/token/introspect`
-            * Endpoint creates token introspection by :py:meth:`aioauth.server.AuthorizationServer.create_token_introspection_response`
+            * Endpoint creates a token introspection by :py:meth:`aioauth.server.AuthorizationServer.create_token_introspection_response`
         * GET `/authorize`
-            * Endpoint creates authorization response by :py:meth:`aioauth.server.AuthorizationServer.create_authorization_response`
+            * Endpoint creates an authorization response by :py:meth:`aioauth.server.AuthorizationServer.create_authorization_response`
 
     Returns:
         :py:class:`fastapi.APIRouter`.

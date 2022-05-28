@@ -2,6 +2,8 @@ import base64
 import hashlib
 import hmac
 import math
+import pathlib
+import re
 import secrets
 import string
 import uuid
@@ -70,6 +72,41 @@ def make_random_password() -> str:
     return "".join(secrets.choice(alphabet) for _ in range(16))
 
 
+def reformat_rsa_key(rsa_key: str) -> str:
+    """Reformat an RSA PEM key without newlines to one with correct newline characters
+
+    @param rsa_key: the PEM RSA key lacking newline characters
+    @return: the reformatted PEM RSA key with appropriate newline characters
+    """
+    # split headers from the body
+    split_rsa_key = re.split(r"(-+)", rsa_key)
+
+    # add newlines between headers and body
+    split_rsa_key.insert(4, "\n")
+    split_rsa_key.insert(6, "\n")
+
+    reformatted_rsa_key = "".join(split_rsa_key)
+
+    # reformat body
+    return RSA.importKey(reformatted_rsa_key).exportKey().decode("utf-8")
+
+
+def read_rsa_key_from_env(file_path: str) -> str:
+    path = pathlib.Path(file_path)
+
+    # path to rsa key file
+    if path.is_file():
+        with open(file_path, "rb") as key_file:
+            jwt_private_key = RSA.importKey(key_file.read()).exportKey()
+        return jwt_private_key.decode("utf-8")
+
+    # rsa key without newlines
+    if "\n" not in file_path:
+        return reformat_rsa_key(file_path)
+
+    return file_path
+
+
 def encode_jwt(
     expires_delta,
     sub,
@@ -110,7 +147,7 @@ def decode_jwt(
 def get_jwt(user):
     access_token = encode_jwt(
         sub=str(user.id),
-        secret=settings.JWT_PRIVATE_KEY,
+        secret=read_rsa_key_from_env(settings.JWT_PRIVATE_KEY),
         expires_delta=settings.ACCESS_TOKEN_EXP,
         additional_claims={
             "token_type": "access",
@@ -123,7 +160,7 @@ def get_jwt(user):
 
     refresh_token = encode_jwt(
         sub=str(user.id),
-        secret=settings.JWT_PRIVATE_KEY,
+        secret=read_rsa_key_from_env(settings.JWT_PRIVATE_KEY),
         expires_delta=settings.REFRESH_TOKEN_EXP,
         additional_claims={
             "token_type": "refresh",
