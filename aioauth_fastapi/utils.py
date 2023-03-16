@@ -31,6 +31,9 @@ async def to_oauth2_request(
     headers = HTTPHeaderDict(**request.headers)
     url = str(request.url)
 
+    assert method == "GET" or method == "POST"
+    _method: RequestMethod = method
+
     user = None
 
     if request.user.is_authenticated:
@@ -38,7 +41,7 @@ async def to_oauth2_request(
 
     return OAuth2Request(
         settings=settings,
-        method=RequestMethod[method],
+        method=_method,
         headers=headers,
         post=Post(**post),
         query=Query(**query_params),
