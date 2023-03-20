@@ -15,7 +15,6 @@ from aioauth.config import Settings
 from aioauth.requests import Post, Query
 from aioauth.requests import Request as OAuth2Request
 from aioauth.responses import Response as OAuth2Response
-from aioauth.types import RequestMethod
 from fastapi import Request, Response
 
 
@@ -27,13 +26,8 @@ async def to_oauth2_request(
 
     post = dict(form)
     query_params = dict(request.query_params)
-    method = request.method
     headers = HTTPHeaderDict(**request.headers)
     url = str(request.url)
-
-    assert method == "GET" or method == "POST"
-    _method: RequestMethod = method
-
     user = None
 
     if request.user.is_authenticated:
@@ -41,10 +35,10 @@ async def to_oauth2_request(
 
     return OAuth2Request(
         settings=settings,
-        method=_method,
+        method=request.method,  # type: ignore
         headers=headers,
-        post=Post(**post),
-        query=Query(**query_params),
+        post=Post(**post),  # type: ignore
+        query=Query(**query_params),  # type: ignore
         url=url,
         user=user,
     )

@@ -2,7 +2,6 @@ import logging
 from uuid import uuid4
 
 import pytest
-from aioauth.types import GrantType, ResponseType
 from alembic.config import main
 from async_asgi_testclient import TestClient
 from Crypto.PublicKey import RSA
@@ -71,16 +70,16 @@ async def client(db: "SQLAlchemyStorage", user: "User") -> Client:
     client_id = uuid4()
     client_secret = uuid4()
     grant_types = [
-        GrantType.TYPE_AUTHORIZATION_CODE.value,
-        GrantType.TYPE_CLIENT_CREDENTIALS.value,
-        GrantType.TYPE_PASSWORD.value,
-        GrantType.TYPE_REFRESH_TOKEN.value,
+        "authorization_code",
+        "password",
+        "client_credentials",
+        "refresh_token",
     ]
     response_types = [
-        ResponseType.TYPE_ID_TOKEN.value,
-        ResponseType.TYPE_CODE.value,
-        ResponseType.TYPE_NONE.value,
-        ResponseType.TYPE_TOKEN.value,
+        "token",
+        "code",
+        "none",
+        "id_token",
     ]
 
     redirect_uris = ["https://localhost"]
