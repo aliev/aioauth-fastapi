@@ -2,7 +2,6 @@ from http import HTTPStatus
 from urllib import parse
 
 import pytest
-from aioauth.types import GrantType, ResponseType, TokenType
 from async_asgi_testclient import TestClient
 
 from aioauth_fastapi_demo.oauth2.models import Client
@@ -19,7 +18,7 @@ async def test_authorization_code_flow(
     response = await http_client.get(
         "/oauth2/authorize",
         query_string={
-            "response_type": f"{ResponseType.TYPE_CODE.value} {ResponseType.TYPE_ID_TOKEN.value}",
+            "response_type": "code id_token",
             "client_id": client.client_id,
             "redirect_uri": client.redirect_uris[0],
             "scope": "openid email profile",
@@ -41,7 +40,7 @@ async def test_authorization_code_flow(
     response = await http_client.post(
         "/oauth2/token",
         form={
-            "grant_type": GrantType.TYPE_AUTHORIZATION_CODE.value,
+            "grant_type": "authorization_code",
             "redirect_uri": client.redirect_uris[0],
             "client_id": client.client_id,
             "client_secret": client.client_secret,
@@ -56,7 +55,7 @@ async def test_authorization_code_flow(
     response = await http_client.post(
         "/oauth2/token",
         form={
-            "grant_type": GrantType.TYPE_REFRESH_TOKEN.value,
+            "grant_type": "refresh_token",
             "refresh_token": refresh_token,
             "client_id": client.client_id,
             "client_secret": client.client_secret,
@@ -69,7 +68,7 @@ async def test_authorization_code_flow(
     response = await http_client.post(
         "/oauth2/token",
         form={
-            "grant_type": GrantType.TYPE_REFRESH_TOKEN.value,
+            "grant_type": "refresh_token",
             "refresh_token": refresh_token,
             "client_id": client.client_id,
             "client_secret": client.client_secret,
@@ -87,7 +86,7 @@ async def test_implicit_flow(http_client: TestClient, user: "User", client: "Cli
     response = await http_client.get(
         "/oauth2/authorize",
         query_string={
-            "response_type": ResponseType.TYPE_TOKEN.value,
+            "response_type": "token",
             "client_id": client.client_id,
             "redirect_uri": client.redirect_uris[0],
         },
@@ -107,7 +106,7 @@ async def test_token_introspection(
     with pytest.raises(TypeError):
         introspect_response = await http_client.post(
             "/oauth2/token/introspect",
-            form={"token": access_token, "token_type": TokenType.ACCESS.value},
+            form={"token": access_token, "token_type": "access_token"},
             # empty basic auth header to ensure get client passes
             headers={"Authorization": "Basic Og=="},
         )
@@ -115,7 +114,7 @@ async def test_token_introspection(
     # correct case
     introspect_response = await http_client.post(
         "/oauth2/token/introspect",
-        form={"token": access_token, "token_type_hint": TokenType.ACCESS.value},
+        form={"token": access_token, "token_type_hint": "access_token"},
         headers={"Authorization": "Basic Og=="},
     )
 

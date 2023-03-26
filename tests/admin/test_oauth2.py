@@ -2,7 +2,6 @@ import uuid
 from http import HTTPStatus
 
 import pytest
-from aioauth.types import GrantType, ResponseType
 from async_asgi_testclient import TestClient
 from sqlalchemy.sql.expression import select
 
@@ -26,8 +25,8 @@ async def test_create_oauth2_client(
     body = {
         "client_id": client_id,
         "client_secret": client_secret,
-        "grant_types": [GrantType.TYPE_AUTHORIZATION_CODE],
-        "response_types": [ResponseType.TYPE_CODE],
+        "grant_types": ["authorization_code"],
+        "response_types": ["code"],
         "redirect_uris": ["https://ownauth.com/callback"],
         "scope": "read write",
     }
