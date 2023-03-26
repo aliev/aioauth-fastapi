@@ -11,8 +11,6 @@ jobs:
     name: Continuous integration
     runs-on: ubuntu-latest
     env:
-      JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-      JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
       PSQL_DSN: postgresql+asyncpg://postgres:aioauth_fastapi_demo@localhost:5432/aioauth_fastapi_demo
     services:
       postgres:
@@ -42,6 +40,8 @@ jobs:
         make lint
     - name: Run tests
       run: |
+        export JWT_PRIVATE_KEY="$(openssl genrsa 4096)"
+        export JWT_PUBLIC_KEY="$(echo -n "$JWT_PRIVATE_KEY" | openssl rsa -pubout)"
         make test
     - name: Upload test coverage
       run: codecov
