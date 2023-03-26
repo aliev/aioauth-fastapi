@@ -41,17 +41,30 @@ Usage example
 ----
 """
 
+from typing import Callable, TypeVar
+
 from aioauth.config import Settings
-from aioauth.requests import Query
+from aioauth.requests import Query, TRequest
 from aioauth.server import AuthorizationServer
+from aioauth.storage import TStorage
 from fastapi import APIRouter, Depends, Request
 
 from .forms import TokenForm, TokenIntrospectForm
-from .utils import to_fastapi_response, to_oauth2_request
+from .utils import (
+    RequestArguments,
+    default_request_factory,
+    to_fastapi_response,
+    to_oauth2_request,
+)
+
+
+ARequest = TypeVar("ARequest", bound=TRequest)
 
 
 def get_oauth2_router(
-    authorization_server: AuthorizationServer, settings: Settings = Settings()
+    authorization_server: AuthorizationServer[ARequest, TStorage],
+    settings: Settings = Settings(),
+    request_factory: Callable[[RequestArguments], ARequest] = default_request_factory,
 ) -> APIRouter:
     """Function will create FastAPI router with the following oauth2 endpoints:
 
@@ -69,7 +82,9 @@ def get_oauth2_router(
 
     @router.post("/token")
     async def token(request: Request, form: TokenForm = Depends()):
-        oauth2_request = await to_oauth2_request(request, settings)
+        oauth2_request = await to_oauth2_request(
+            request=request, request_factory=request_factory, settings=settings
+        )
         oauth2_response = await authorization_server.create_token_response(
             oauth2_request
         )
@@ -77,7 +92,9 @@ def get_oauth2_router(
 
     @router.post("/token/introspect")
     async def token_introspect(request: Request, form: TokenIntrospectForm = Depends()):
-        oauth2_request = await to_oauth2_request(request, settings)
+        oauth2_request = await to_oauth2_request(
+            request=request, request_factory=request_factory, settings=settings
+        )
         oauth2_response = (
             await authorization_server.create_token_introspection_response(
                 oauth2_request
@@ -87,7 +104,9 @@ def get_oauth2_router(
 
     @router.get("/authorize")
     async def authorize(request: Request, query: Query = Depends()):
-        oauth2_request = await to_oauth2_request(request, settings)
+        oauth2_request = await to_oauth2_request(
+            request=request, request_factory=request_factory, settings=settings
+        )
         oauth2_response = await authorization_server.create_authorization_response(
             oauth2_request
         )
