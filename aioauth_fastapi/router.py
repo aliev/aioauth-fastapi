@@ -44,12 +44,11 @@ Usage example
 from typing import Callable, TypeVar
 
 from aioauth.config import Settings
-from aioauth.requests import Query, TRequest
+from aioauth.requests import TRequest
 from aioauth.server import AuthorizationServer
 from aioauth.storage import TStorage
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 
-from .forms import TokenForm, TokenIntrospectForm
 from .utils import (
     RequestArguments,
     default_request_factory,
@@ -81,7 +80,7 @@ def get_oauth2_router(
     router = APIRouter()
 
     @router.post("/token")
-    async def token(request: Request, form: TokenForm = Depends()):
+    async def token(request: Request):
         oauth2_request = await to_oauth2_request(
             request=request, request_factory=request_factory, settings=settings
         )
@@ -91,7 +90,7 @@ def get_oauth2_router(
         return await to_fastapi_response(oauth2_response)
 
     @router.post("/token/introspect")
-    async def token_introspect(request: Request, form: TokenIntrospectForm = Depends()):
+    async def token_introspect(request: Request):
         oauth2_request = await to_oauth2_request(
             request=request, request_factory=request_factory, settings=settings
         )
@@ -103,7 +102,7 @@ def get_oauth2_router(
         return await to_fastapi_response(oauth2_response)
 
     @router.get("/authorize")
-    async def authorize(request: Request, query: Query = Depends()):
+    async def authorize(request: Request):
         oauth2_request = await to_oauth2_request(
             request=request, request_factory=request_factory, settings=settings
         )
