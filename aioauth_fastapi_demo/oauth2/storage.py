@@ -1,9 +1,10 @@
+from datetime import datetime, timezone
 from typing import Optional
 
 from aioauth.models import AuthorizationCode, Client, Token
 from aioauth.requests import Request
 from aioauth.storage import BaseStorage
-from aioauth.types import GrantType, ResponseType, TokenType
+from aioauth.types import CodeChallengeMethod, ResponseType
 from aioauth.utils import enforce_list
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -25,11 +26,11 @@ class Storage(BaseStorage):
     async def get_user(self, request: Request):
         user: Optional[User] = None
 
-        if request.query.response_type == ResponseType.TYPE_TOKEN:
+        if request.query.response_type == "token":
             # If ResponseType is token get the user from current session
             user = request.user
 
-        if request.post.grant_type == GrantType.TYPE_AUTHORIZATION_CODE:
+        if request.post.grant_type == "authorization_code":
             # If GrantType is authorization code get user from DB by code
             q_results = await self.storage.select(
                 select(AuthorizationCodeDB).where(
@@ -49,7 +50,7 @@ class Storage(BaseStorage):
 
             user = q_results.scalars().one_or_none()
 
-        if request.post.grant_type == GrantType.TYPE_REFRESH_TOKEN:
+        if request.post.grant_type == "refresh_token":
             # Get user from token
             q_results = await self.storage.select(
                 select(TokenDB)
@@ -69,17 +70,31 @@ class Storage(BaseStorage):
         return user
 
     async def create_token(
-        self, request: Request, client_id: str, scope: str, *args, **kwargs
+        self,
+        request: Request,
+        client_id: str,
+        scope: str,
+        access_token: str,
+        refresh_token: str,
     ) -> Token:
         """
         Create token and store it in storage.
         """
         user = await self.get_user(request)
 
-        access_token, refresh_token = get_jwt(user)
+        _access_token, _refresh_token = get_jwt(user)
 
-        token = await super().create_token(
-            request, client_id, scope, access_token, refresh_token
+        token = Token(
+            access_token=_access_token,
+            client_id=client_id,
+            expires_in=300,
+            issued_at=int(datetime.now(tz=timezone.utc).timestamp()),
+            refresh_token=_refresh_token,
+            refresh_token_expires_in=900,
+            revoked=False,
+            scope=scope,
+            token_type="Bearer",
+            user=user,
         )
 
         token_record = TokenDB(
@@ -117,11 +132,11 @@ class Storage(BaseStorage):
         self,
         request: Request,
         client_id: str,
+        token_type: Optional[str] = "refresh_token",
         access_token: Optional[str] = None,
         refresh_token: Optional[str] = None,
-        token_type: Optional[str] = "refresh_token",
     ) -> Optional[Token]:
-        if token_type == TokenType.REFRESH:
+        if token_type == "refresh_token":
             q = select(TokenDB).where(TokenDB.refresh_token == refresh_token)
         else:
             q = select(TokenDB).where(TokenDB.access_token == access_token)
@@ -147,10 +162,27 @@ class Storage(BaseStorage):
             )
 
     async def create_authorization_code(
-        self, request: Request, *args, **kwargs
+        self,
+        request: Request,
+        client_id: str,
+        scope: str,
+        response_type: ResponseType,
+        redirect_uri: str,
+        code_challenge_method: Optional[CodeChallengeMethod],
+        code_challenge: Optional[str],
+        code: str,
     ) -> AuthorizationCode:
-        authorization_code = await super().create_authorization_code(
-            request, *args, **kwargs
+        authorization_code = AuthorizationCode(
+            auth_time=int(datetime.now(tz=timezone.utc).timestamp()),
+            client_id=client_id,
+            code=code,
+            code_challenge=code_challenge,
+            code_challenge_method=code_challenge_method,
+            expires_in=300,
+            redirect_uri=redirect_uri,
+            response_type=response_type,
+            scope=scope,
+            user=request.user,
         )
 
         authorization_code_record = AuthorizationCodeDB(
