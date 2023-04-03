@@ -1,5 +1,5 @@
 from aioauth.config import Settings
-from aioauth.requests import Query
+from aioauth.requests import Query, Request as OAuth2Request
 from aioauth.server import AuthorizationServer
 from fastapi import APIRouter, Depends, Request
 
@@ -27,7 +27,7 @@ async def token(
 ):
     oauth2_storage = Storage(storage=storage)
     authorization_server = AuthorizationServer(storage=oauth2_storage)
-    oauth2_request = await to_oauth2_request(request, settings)
+    oauth2_request: OAuth2Request = await to_oauth2_request(request, settings)
     oauth2_response = await authorization_server.create_token_response(oauth2_request)
     return await to_fastapi_response(oauth2_response)
 
@@ -40,7 +40,7 @@ async def token_introspect(
 ):
     oauth2_storage = Storage(storage=storage)
     authorization_server = AuthorizationServer(storage=oauth2_storage)
-    oauth2_request = await to_oauth2_request(request, settings)
+    oauth2_request: OAuth2Request = await to_oauth2_request(request, settings)
     oauth2_response = await authorization_server.create_token_introspection_response(
         oauth2_request
     )
@@ -55,7 +55,7 @@ async def authorize(
 ):
     oauth2_storage = Storage(storage=storage)
     authorization_server = AuthorizationServer(storage=oauth2_storage)
-    oauth2_request = await to_oauth2_request(request, settings)
+    oauth2_request: OAuth2Request = await to_oauth2_request(request, settings)
     oauth2_response = await authorization_server.create_authorization_response(
         oauth2_request
     )
