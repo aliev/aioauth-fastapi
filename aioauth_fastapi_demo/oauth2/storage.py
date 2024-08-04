@@ -216,6 +216,11 @@ class Storage(BaseStorage):
         if not client_record:
             return None
 
+        if client_secret is not None and client_record.client_secret is not None:
+            # validate the client_secret
+            if client_secret != client_record.client_secret:
+                return None
+
         return Client(
             client_id=client_record.client_id,
             client_secret=client_record.client_secret,
