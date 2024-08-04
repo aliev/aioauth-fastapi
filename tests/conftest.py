@@ -1,5 +1,6 @@
 import logging
-from uuid import uuid4
+from typing import Optional
+from uuid import UUID, uuid4
 
 import pytest
 from alembic.config import main
@@ -65,16 +66,19 @@ async def user(db: "SQLAlchemyStorage", user_password: str) -> User:
     return user
 
 
-@pytest.fixture
-async def client(db: "SQLAlchemyStorage", user: "User") -> Client:
-    client_id = uuid4()
-    client_secret = uuid4()
+async def _create_client(
+    db: "SQLAlchemyStorage",
+    user: "User",
+    client_id: UUID,
+    client_secret: Optional[UUID],
+) -> Client:
     grant_types = [
         "authorization_code",
-        "client_credentials",
         "password",
         "refresh_token",
     ]
+    if client_secret is not None:
+        grant_types.append("client_credentials")
     response_types = [
         "code",
         "id_token",
@@ -88,7 +92,7 @@ async def client(db: "SQLAlchemyStorage", user: "User") -> Client:
 
     client = Client(
         client_id=str(client_id),
-        client_secret=str(client_secret),
+        client_secret=str(client_secret) if client_secret is not None else None,
         response_types=response_types,
         grant_types=grant_types,
         redirect_uris=redirect_uris,
@@ -99,3 +103,17 @@ async def client(db: "SQLAlchemyStorage", user: "User") -> Client:
     await db.add(client)
 
     return client
+
+
+@pytest.fixture
+async def client(db: "SQLAlchemyStorage", user: "User") -> Client:
+    client_id = uuid4()
+    client_secret = uuid4()
+    return await _create_client(db, user, client_id, client_secret)
+
+
+@pytest.fixture
+async def public_client(db: "SQLAlchemyStorage", user: "User") -> Client:
+    client_id = uuid4()
+    client_secret = None
+    return await _create_client(db, user, client_id, client_secret)

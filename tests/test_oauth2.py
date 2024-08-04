@@ -9,10 +9,7 @@ from aioauth_fastapi_demo.users.crypto import get_jwt
 from aioauth_fastapi_demo.users.models import User
 
 
-@pytest.mark.asyncio
-async def test_authorization_code_flow(
-    http_client: TestClient, user: "User", client: "Client"
-):
+async def _get_authorization_code(http_client, user, client):
     access_token, _ = get_jwt(user)
 
     response = await http_client.get(
@@ -37,6 +34,15 @@ async def test_authorization_code_flow(
     assert "scope" in parsed_qs.keys()
     assert "id_token" in parsed_qs.keys()
 
+    return parsed_qs["code"][0]
+
+
+@pytest.mark.asyncio
+async def test_authorization_code_flow(
+    http_client: TestClient, user: "User", client: "Client"
+):
+    authorization_code = await _get_authorization_code(http_client, user, client)
+
     response = await http_client.post(
         "/oauth2/token",
         form={
@@ -44,7 +50,7 @@ async def test_authorization_code_flow(
             "redirect_uri": client.redirect_uris[0],
             "client_id": client.client_id,
             "client_secret": client.client_secret,
-            "code": parsed_qs["code"][0],
+            "code": authorization_code,
         },
     )
 
@@ -77,6 +83,81 @@ async def test_authorization_code_flow(
     assert (
         response.status_code == HTTPStatus.BAD_REQUEST
     ), "re-trying to revoke an already revoked token should be rejected"
+
+
+@pytest.mark.asyncio
+async def test_authorization_code_no_secret(
+    http_client: TestClient, user: "User", client: "Client"
+):
+    authorization_code = await _get_authorization_code(http_client, user, client)
+
+    response = await http_client.post(
+        "/oauth2/token",
+        form={
+            "grant_type": "authorization_code",
+            "redirect_uri": client.redirect_uris[0],
+            "client_id": client.client_id,
+            "code": authorization_code,
+        },
+    )
+
+    assert (
+        response.status_code == HTTPStatus.UNAUTHORIZED
+    ), "no client secret for a confidential client should be rejected"
+
+
+@pytest.mark.asyncio
+async def test_authorization_code_wrong_secret(
+    http_client: TestClient, user: "User", client: "Client"
+):
+    authorization_code = await _get_authorization_code(http_client, user, client)
+
+    response = await http_client.post(
+        "/oauth2/token",
+        form={
+            "grant_type": "authorization_code",
+            "redirect_uri": client.redirect_uris[0],
+            "client_id": client.client_id,
+            "client_secret": f"not {client.client_secret}",
+            "code": authorization_code,
+        },
+    )
+
+    assert (
+        response.status_code == HTTPStatus.UNAUTHORIZED
+    ), "wrong client secret for a confidential client should be rejected"
+
+
+@pytest.mark.asyncio
+async def test_authorization_code_public_client(
+    http_client: TestClient, user: "User", public_client: "Client"
+):
+    authorization_code = await _get_authorization_code(http_client, user, public_client)
+
+    response = await http_client.post(
+        "/oauth2/token",
+        form={
+            "grant_type": "authorization_code",
+            "redirect_uri": public_client.redirect_uris[0],
+            "client_id": public_client.client_id,
+            "code": authorization_code,
+        },
+    )
+
+    assert "access_token" in response.json()
+
+    refresh_token = response.json()["refresh_token"]
+
+    response = await http_client.post(
+        "/oauth2/token",
+        form={
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": public_client.client_id,
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
 
 
 @pytest.mark.asyncio

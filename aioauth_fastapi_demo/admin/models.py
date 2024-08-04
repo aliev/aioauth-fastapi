@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class ClientCreate(BaseModel):
     client_id: str
-    client_secret: str
+    client_secret: Optional[str]
     grant_types: List[GrantType]
     response_types: List[ResponseType]
     redirect_uris: List[str]

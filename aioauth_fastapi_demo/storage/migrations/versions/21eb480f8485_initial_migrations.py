@@ -1,8 +1,8 @@
 """Initial migrations
 
-Revision ID: 07a7ace268a7
+Revision ID: 21eb480f8485
 Revises:
-Create Date: 2021-10-02 22:50:10.418498
+Create Date: 2024-08-03 21:35:56.307146
 
 """
 import sqlalchemy as sa
@@ -10,7 +10,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "07a7ace268a7"
+revision = "21eb480f8485"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -125,7 +125,7 @@ def upgrade():
         sa.Column("redirect_uris", sa.ARRAY(sa.String()), nullable=True),
         sa.Column("id", sqlmodel.sql.sqltypes.GUID(), nullable=False),
         sa.Column("client_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("client_secret", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("client_secret", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("scope", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("user_id", sqlmodel.sql.sqltypes.GUID(), nullable=False),
         sa.ForeignKeyConstraint(
