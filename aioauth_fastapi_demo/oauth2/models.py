@@ -13,7 +13,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class Client(BaseTable, table=True):  # type: ignore
     client_id: str
-    client_secret: str
+    client_secret: Optional[str]
     grant_types: List[str] = Field(sa_column=Column(ARRAY(String)))
     response_types: List[str] = Field(sa_column=Column(ARRAY(String)))
     redirect_uris: List[str] = Field(sa_column=Column(ARRAY(String)))
