@@ -4,7 +4,7 @@ from typing import Optional
 from aioauth.models import AuthorizationCode, Client, Token
 from aioauth.requests import Request
 from aioauth.storage import BaseStorage
-from aioauth.types import CodeChallengeMethod, ResponseType
+from aioauth.types import CodeChallengeMethod, ResponseType, TokenType
 from aioauth.utils import enforce_list
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -114,12 +114,21 @@ class Storage(BaseStorage):
 
         return token
 
-    async def revoke_token(self, request: Request, refresh_token: str) -> None:
+    async def revoke_token(
+        self,
+        request: Request,
+        token_type: Optional[TokenType] = "refresh_token",
+        access_token: Optional[str] = None,
+        refresh_token: Optional[str] = None,
+    ) -> None:
         """
         Remove refresh_token from whitelist.
         """
         q_results = await self.storage.select(
-            select(TokenDB).where(TokenDB.refresh_token == refresh_token)
+            select(TokenDB).where(
+                (TokenDB.access_token == access_token)
+                | (TokenDB.refresh_token == refresh_token)
+            )
         )
         token_record: Optional[TokenDB]
         token_record = q_results.scalars().one_or_none()
@@ -132,7 +141,7 @@ class Storage(BaseStorage):
         self,
         request: Request,
         client_id: str,
-        token_type: Optional[str] = "refresh_token",
+        token_type: Optional[TokenType] = "refresh_token",
         access_token: Optional[str] = None,
         refresh_token: Optional[str] = None,
     ) -> Optional[Token]:
@@ -171,6 +180,7 @@ class Storage(BaseStorage):
         code_challenge_method: Optional[CodeChallengeMethod],
         code_challenge: Optional[str],
         code: str,
+        **kwargs,
     ) -> AuthorizationCode:
         authorization_code = AuthorizationCode(
             auth_time=int(datetime.now(tz=timezone.utc).timestamp()),
@@ -268,15 +278,19 @@ class Storage(BaseStorage):
         request: Request,
         client_id: str,
         scope: str,
-        response_type: str,
+        response_type: ResponseType,
         redirect_uri: str,
-        nonce: str,
+        nonce: Optional[str] = None,
+        **kwargs
     ) -> str:
         scopes = enforce_list(scope)
         user_data = {}
 
         if "email" in scopes:
             user_data["username"] = request.user.username
+
+        if nonce is not None:
+            user_data["nonce"] = nonce
 
         return encode_jwt(
             expires_delta=settings.ACCESS_TOKEN_EXP,
