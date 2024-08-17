@@ -75,6 +75,7 @@ setup(
     author_email=about["__author_email__"],
     url=about["__url__"],
     license=about["__license__"],
+    package_data={"aioauth_fastapi": ["py.typed"]},
     python_requires=">=3.6.0",
     classifiers=classifiers,
     extras_require={
