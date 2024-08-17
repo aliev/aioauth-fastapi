@@ -281,7 +281,7 @@ class Storage(BaseStorage):
         response_type: ResponseType,
         redirect_uri: str,
         nonce: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> str:
         scopes = enforce_list(scope)
         user_data = {}
